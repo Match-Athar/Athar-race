@@ -65,11 +65,32 @@ https://<account>.github.io/<repo>/
 
 Send that link to the branches once; it updates itself.
 
-## Every month
+## Months, the dropdown and the winners page
 
-Replace `data/master.xlsx` with the new month's workbook and push (or upload it in the
-GitHub UI). The `data/**` path triggers a rebuild. Also update the countdown deadline in
-`templates/race.html` (`DEADLINE` — currently end of October 2026).
+The board builds **one page with a month dropdown**, driven by `data/months.json`:
+
+```json
+{
+  "default": "2026-11",           // which month the dropdown opens on
+  "winners_from": "2026-11-10",   // October's winners page appears on/after this date
+  "months": [
+    { "ym": "2026-11", "ref": "data/master-2026-11.xlsx" },
+    { "ym": "2026-10", "ref": "data/master-2026-10.xlsx", "winners": true }
+  ]
+}
+```
+
+- Each month has its **own workbook** (`data/master-YYYY-MM.xlsx`) with that month's targets, ceilings, curve.
+- Sales for every month come from the live API for that month's date range.
+- A month marked `"winners": true` shows a **prize-winners page** (car + each phone/iPad/watch/gold seat: branch + its top employee) **instead of** its race board, but only on/after `winners_from`. Before that date, selecting it shows its normal race board.
+- The countdown and all labels follow the selected month automatically — **no code edit needed** for a new month.
+
+### Adding a new month
+1. Add its workbook, e.g. `data/master-2026-12.xlsx`.
+2. Add a line to `data/months.json` (and set `"default"` / `"winners"` as you want).
+3. Push. The `data/**` path triggers a rebuild.
+
+> **November targets are currently a placeholder** (a copy of October). Replace `data/master-2026-11.xlsx` with the real November targets workbook — same structure as the October one — then push.
 
 ## Notes
 

@@ -267,6 +267,36 @@ textarea.copyfb{width:100%;min-height:120px;margin-top:8px;font:inherit;font-siz
 @media (prefers-reduced-motion:no-preference){
   .road .car,.road .fill{transition:all .8s cubic-bezier(.2,.8,.2,1)}
 }
+/* Month dropdown */
+.msel{display:flex;flex-direction:column;gap:2px;font-size:.72rem;opacity:.9;line-height:1.2}
+.msel select{font:inherit;font-family:var(--f-display);font-size:.98rem;font-weight:700;background:rgba(255,255,255,.14);
+  color:var(--brand-ink);border:1px solid rgba(255,255,255,.35);border-radius:9px;padding:4px 10px;cursor:pointer}
+.msel select option{color:#111}
+/* Winners mode: hide the race board, show only the winners page */
+#winnersView{display:none}
+body.winners-mode #winnersView{display:block}
+body.winners-mode .secs,body.winners-mode .newsbar,body.winners-mode .cd,
+body.winners-mode main>section:not(#winnersView){display:none}
+/* Winners page */
+.whead{margin:6px 0 0;font-family:var(--f-display);font-size:1.15rem;color:var(--gold)}
+.wtier{margin-top:22px}
+.wtier-h{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.wtier-h .wmedal{font-size:1.9rem;line-height:1}
+.wtier-h b{font-family:var(--f-display);font-size:1.2rem}
+.wtier-h small{display:block;color:var(--muted);font-size:.8rem}
+.wgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.wcard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;position:relative;overflow:hidden}
+.wcard::before{content:"";position:absolute;inset-block:0;inset-inline-start:0;width:4px;background:var(--gold)}
+.wcard .wtierlbl{font-size:.7rem;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.04em}
+.wcard .wbranch{font-family:var(--f-display);font-size:1.1rem;font-weight:700;margin-top:3px}
+.wcard .wcity{font-size:.82rem;color:var(--muted);margin-top:2px}
+.wcard .wemp{margin-top:10px;font-weight:600;font-size:.95rem}
+.wcard .wach{position:absolute;top:12px;inset-inline-end:14px;font-family:var(--f-num);font-weight:700;color:var(--ok,#1a7)}
+.wcar{background:linear-gradient(135deg,#13534f,#0E4D4A);color:#fff;border-color:transparent}
+.wcar .wbranch,.wcar .wemp{color:#fff}
+.wcar .wcity{color:rgba(255,255,255,.75)}
+.wcar .wtierlbl{color:var(--gold-soft)}
+.wcar::before{width:0}
 </style>
 
 
@@ -288,6 +318,7 @@ textarea.copyfb{width:100%;min-height:120px;margin-top:8px;font:inherit;font-siz
       </div>
       <div><span data-t="announce">إعلان النتائج</span><b id="hAnn">10 Nov</b></div>
       <div><span data-t="updated">آخر تحديث</span><b id="hUpd">—</b></div>
+      <div class="msel"><span data-t="monthLbl">الشهر</span><select id="mSel" aria-label="Month"></select></div>
       <div class="tog" role="group" aria-label="Language">
         <button id="bAr" aria-pressed="true">عربي</button><button id="bEn" aria-pressed="false">EN</button>
       </div>
@@ -404,14 +435,27 @@ textarea.copyfb{width:100%;min-height:120px;margin-top:8px;font:inherit;font-siz
     </div>
     <div class="panel" style="margin-top:16px"><h3 data-t="cycH">بعد نهاية الشهر</h3><div class="cycle" id="cycle"></div></div>
   </div></section>
+
+  <section id="winnersView"><div class="wrap">
+    <div class="sh"><div>
+      <div class="eyebrow" id="winnersEy">النتائج النهائية</div>
+      <h2 data-t="wTitle">الفائزون 🏆</h2>
+      <p id="winnersHead" class="whead"></p>
+    </div></div>
+    <div id="winnersBody"></div>
+  </div></section>
 </main>
 <footer><div class="wrap" id="foot"></div></footer>
 <div class="toast" id="toast" hidden></div>
 
 <script id="embed" type="application/json">{}</script>
 <script>
-const D = JSON.parse(document.getElementById('embed').textContent);
-const L = D.last, NDAYS = D.days, LEFT = D.left;
+const EMBED = JSON.parse(document.getElementById('embed').textContent);
+let MONTH = EMBED.default || Object.keys(EMBED.months)[0];
+let D, L, NDAYS, LEFT, RACE, BY;
+function bindMonth(k){ MONTH=k; D=EMBED.months[k]; L=D.last; NDAYS=D.days; LEFT=D.left;
+  RACE=D.stores; BY={}; RACE.forEach(s=>BY[s.code]=s); }
+bindMonth(MONTH);
 const TIERS = [
   {k:'A', min:400000, n:1,  ar:'سيارة', en:'Car', ex:{ar:'12 شهراً',en:'12 months'}},
   {k:'B', min:200000, n:10, ar:'جوال ذكي', en:'Smartphone', ex:{ar:'6 أشهر',en:'6 months'}},
@@ -424,6 +468,7 @@ const S = {
   tgIn:'🎉 دخل الجوائز',tgOut:'⚠️ خرج من الجوائز',tgJump:'🚀 قفزة اليوم',tgClimb:'⬆️ صعود',tgStar:'⭐ نجم اليوم',tgTier:'🔁 تغيّرت الفئة',
   nPts:(x)=>`+${x} نقطة`,nRank:(r)=>`الآن المركز ${r}`,nMv:(m)=>`صعد ${m} مراكز`,nNowTier:(t)=>`متوقع: ${t}`,nWas:(t)=>`كان: ${t}`,nPos:(p)=>`الأعلى مبيعاً أمس #${p}`,
   brand:'مسابقة أثر',brandSub:'سباق MATCH · أكتوبر 2026',dataTo:'البيانات حتى',daysLeft:'العد التنازلي',announce:'إعلان النتائج',updated:'آخر تحديث',cdD:'يوم',cdH:'ساعة',cdM:'دقيقة',cdS:'ثانية',
+  monthLbl:'الشهر',brandPre:'سباق MATCH ·',wTitle:'الفائزون 🏆',wEy:'النتائج النهائية',wSeats:(n)=>`${n} فائز`,wHead:(n)=>`🚗 الفائز بالسيارة: ${n}`,wNone:'لم تُحسم الجوائز بعد',wEmp:'الموظف الفائز',
   nMine:'فرعي',nCar:'سباق السيارة',nBoard:'لوحة الجوائز',nClose:'على بُعد خطوة',nMovers:'الصاعدون',nStars:'نجوم المبيعات',nAreas:'المناطق',nAll:'كل الفروع',nRules:'كيف تفوز؟',
   pulseEy:'نبض الشهر',findLbl:'اكتب اسم فرعك أو رقمك الوظيفي أو اسمك',findPh:'مثال: Abraj · 2958 · Ahmed',
   carEy:'الفئة A · جائزة واحدة على مستوى الشركة',carH:'سباق السيارة',carP:'خط النهاية 100% من المستهدف، مع بلوغ حد مبيعات فئة السيارة لفروع MATCH. يظهر هنا كل فرع يمكنه المنافسة عليها.',
@@ -481,6 +526,7 @@ const S = {
   tgIn:'🎉 Entered prizes',tgOut:'⚠️ Dropped out',tgJump:'🚀 Today’s jump',tgClimb:'⬆️ Climber',tgStar:'⭐ Star of the day',tgTier:'🔁 Category change',
   nPts:(x)=>`+${x} pts`,nRank:(r)=>`now #${r}`,nMv:(m)=>`up ${m} places`,nNowTier:(t)=>`projected: ${t}`,nWas:(t)=>`was: ${t}`,nPos:(p)=>`#${p} seller yesterday`,
   brand:'Athar Competition',brandSub:'MATCH race · October 2026',dataTo:'Data through',daysLeft:'Countdown',announce:'Results',updated:'Last updated',cdD:'days',cdH:'hrs',cdM:'min',cdS:'sec',
+  monthLbl:'Month',brandPre:'MATCH race ·',wTitle:'Winners 🏆',wEy:'Final results',wSeats:(n)=>`${n} winner${n>1?'s':''}`,wHead:(n)=>`🚗 Car winner: ${n}`,wNone:'No prizes decided yet',wEmp:'Winning employee',
   nMine:'My store',nCar:'Car race',nBoard:'Prize board',nClose:'One step away',nMovers:'Risers',nStars:'Sales stars',nAreas:'Areas',nAll:'All stores',nRules:'How to win',
   pulseEy:'Month pulse',findLbl:'Type your store, employee number, or name',findPh:'e.g. Abraj · 2958 · Ahmed',
   carEy:'Category A · one car, company-wide',carH:'The car race',carP:'The finish line is 100% of target, plus the MATCH monthly sales threshold for the car. Every store that can compete for it is on the track.',
@@ -542,8 +588,9 @@ const fp=(x,d=1)=>(x*100).toFixed(d)+'%';
 const sg=(x,d=1)=>(x>=0?'+':'')+(x*100).toFixed(d)+'%';
 const N=s=>`<span class="num">${s}</span>`;
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const dateLbl=(i)=>new Date(2026,9,i+1).toLocaleDateString(LANG==='ar'?'ar-SA-u-ca-gregory-nu-latn':'en-GB',{day:'numeric',month:'short'});
-const RACE=D.stores, BY={}; RACE.forEach(s=>BY[s.code]=s);
+const LOC=()=>LANG==='ar'?'ar-SA-u-ca-gregory-nu-latn':'en-GB';
+const dateLbl=(i)=>{const [yy,mm]=D.asOf.split('-').map(Number);return new Date(yy,mm-1,i+1).toLocaleDateString(LOC(),{day:'numeric',month:'short'});};
+const monthName=(k)=>{const [yy,mm]=k.split('-').map(Number);return new Date(yy,mm-1,1).toLocaleDateString(LOC(),{month:'long',year:'numeric'});};
 const fk=n=>n>=1e6?(n/1e6).toFixed(n>=1e7?0:1)+'M':Math.round(n/1e3)+'K';
 
 /* header + pulse */
@@ -553,7 +600,15 @@ function renderStatic(){
   document.querySelectorAll('[data-tp]').forEach(el=>el.placeholder=S[LANG][el.dataset.tp]);
   document.getElementById('bAr').setAttribute('aria-pressed',LANG==='ar'); document.getElementById('bEn').setAttribute('aria-pressed',LANG==='en');
   document.getElementById('hAsOf').textContent=dateLbl(L); document.getElementById('hUpd').textContent=fmtUpd();
-  document.getElementById('hAnn').textContent=new Date(2026,10,10).toLocaleDateString(LANG==='ar'?'ar-SA-u-ca-gregory-nu-latn':'en-GB',{day:'numeric',month:'short'});
+  document.getElementById('hAnn').textContent=EMBED.winnersFrom?new Date(EMBED.winnersFrom+'T00:00:00').toLocaleDateString(LOC(),{day:'numeric',month:'short'}):'—';
+  document.querySelector('.mark small').textContent=t('brandPre')+' '+monthName(MONTH);   // month-aware subtitle
+  const we=document.getElementById('winnersEy'); if(we) we.textContent=t('wEy')+' · '+monthName(MONTH);
+  fillMonths();
+}
+function fillMonths(){
+  const sel=document.getElementById('mSel'); if(!sel) return;
+  sel.innerHTML=Object.keys(EMBED.months).map(k=>`<option value="${k}">${monthName(k)}</option>`).join('');
+  sel.value=MONTH;
 }
 function renderPulse(){
   const p=D.pulse, lead=RACE.filter(s=>s.carField)[0], w=RACE.find(s=>s.prize==='A');
@@ -809,21 +864,47 @@ function renderNews(){
 }
 document.getElementById('nBtn').addEventListener('click',()=>{NOPEN=!NOPEN; renderNews();});
 function renderAllViews(){ renderStatic(); renderNews(); renderPulse(); renderQuick(); renderMine(); renderTrack(); renderBoard(); renderClose(); renderMovers(); renderStars(); renderAreas(); fillFilters(); renderAll(); renderRules(); }
-function setLang(l){ LANG=l; try{localStorage.setItem('athar-lang',l);}catch(e){} renderAllViews(); }
-bAr.onclick=()=>setLang('ar'); bEn.onclick=()=>setLang('en');
 
-// "Last updated" (build time, shown in the GCC zone) and a live countdown to the competition close.
+// Month switching: October after the reveal date shows the winners page instead of the race board.
+function winnersActive(k){ return (EMBED.winnersMonths||[]).includes(k) && EMBED.winnersFrom && new Date() >= new Date(EMBED.winnersFrom+'T00:00:00'); }
+function selectMonth(k){ bindMonth(k); DEADLINE=monthDeadline();
+  const win=winnersActive(k); document.body.classList.toggle('winners-mode', win);
+  if(win){ renderStatic(); renderWinners(); } else { renderAllViews(); } tickCD(); }
+const WMEDAL={A:'🚗',B:'📱',C:'💻',D:'⌚',E:'🥇'};
+function renderWinners(){
+  const by={A:[],B:[],C:[],D:[],E:[]};
+  RACE.forEach(s=>{ if(s.prize && by[s.prize]) by[s.prize].push(s); });
+  Object.values(by).forEach(a=>a.sort((x,y)=>y.ach-x.ach));
+  const car=by.A[0];
+  document.getElementById('winnersHead').innerHTML=t('wHead', car?esc(car.name):'—');
+  let html='';
+  TIERS.forEach(tr=>{ const list=by[tr.k]; if(!list||!list.length) return;
+    html+=`<div class="wtier"><div class="wtier-h"><span class="wmedal">${WMEDAL[tr.k]}</span>`+
+      `<div><b>${tr[LANG]}</b><small>${t('wSeats',list.length)}</small></div></div><div class="wgrid">`+
+      list.map(s=>{const emp=s.team&&s.team[0];
+        return `<div class="wcard${tr.k==='A'?' wcar':''}"><div class="wach">${fp(s.ach)}</div>`+
+          `<div class="wtierlbl">${tr[LANG]}</div><div class="wbranch">${esc(s.name)}</div>`+
+          `<div class="wcity">${esc(s.city)} · ${esc(s.am)}</div>`+
+          `<div class="wemp">🏅 ${emp?esc(emp[0])+(emp[1]?` <span class="muted num">${emp[1]}</span>`:''):'—'}</div></div>`;}).join('')+
+      `</div></div>`; });
+  document.getElementById('winnersBody').innerHTML=html||`<p class="muted">${t('wNone')}</p>`;
+}
+function setLang(l){ LANG=l; try{localStorage.setItem('athar-lang',l);}catch(e){} selectMonth(MONTH); }
+bAr.onclick=()=>setLang('ar'); bEn.onclick=()=>setLang('en');
+document.getElementById('mSel').onchange=(e)=>selectMonth(e.target.value);
+
+// "Last updated" (build time, GCC zone) and a live countdown to the end of the selected month.
 function fmtUpd(){ if(!D.built) return '—'; const dt=new Date(D.built);
-  try{ return dt.toLocaleString(LANG==='ar'?'ar-SA-u-ca-gregory-nu-latn':'en-GB',
-      {timeZone:D.tz||'Asia/Riyadh',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}); }
+  try{ return dt.toLocaleString(LOC(),{timeZone:D.tz||'Asia/Riyadh',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}); }
   catch(e){ return dt.toLocaleString(); } }
-const _tzOff=(D.tz==='Asia/Dubai'||D.tz==='Asia/Muscat')?4:3;                 // GCC has no DST, so a fixed offset is exact
-const DEADLINE=Date.UTC(2026,10,1,0,0,0)-_tzOff*3600*1000;                    // end of 31 Oct 2026 (GCC) = competition close
+function monthDeadline(){ const off=(D.tz==='Asia/Dubai'||D.tz==='Asia/Muscat')?4:3;   // GCC has no DST
+  const [yy,mm]=MONTH.split('-').map(Number); return Date.UTC(yy,mm,1,0,0,0)-off*3600*1000; }   // end of the selected month
+let DEADLINE=0;
 function tickCD(){ let s=Math.max(0,Math.floor((DEADLINE-Date.now())/1000));
   const d=Math.floor(s/86400); s-=d*86400; const h=Math.floor(s/3600); s-=h*3600; const m=Math.floor(s/60); s-=m*60;
   const q={d,h,m,s}; for(const k in q){ const e=document.querySelector(`#hCountdown [data-cd="${k}"]`); if(e) e.textContent=String(q[k]).padStart(2,'0'); } }
 
-renderAllViews();
-tickCD(); setInterval(tickCD,1000);
+selectMonth(MONTH);
+setInterval(tickCD,1000);
 </script>
 

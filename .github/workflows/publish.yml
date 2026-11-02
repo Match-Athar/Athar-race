@@ -41,7 +41,7 @@ jobs:
           ODOO_API_URL: ${{ secrets.ODOO_API_URL }}
           ODOO_API_TOKEN: ${{ secrets.ODOO_API_TOKEN }}
           ODOO_TZ: ${{ secrets.ODOO_TZ }}
-        run: python run.py --api --ref data/master.xlsx --public-only --out site
+        run: python run.py --api --months data/months.json --out site
       - name: Keep only the public page
         run: rm -rf site/data site/csv
       - uses: actions/upload-pages-artifact@v3

@@ -18,6 +18,7 @@ import os
 import sys
 import json
 import argparse
+import calendar
 import time
 import threading
 import http.server
@@ -43,6 +44,8 @@ def main():
     ap.add_argument("--target", help="monthly target file (.xlsx); required with --pos/--api, unused with --master")
     ap.add_argument("--ref", help="with --api: master workbook for the non-sales reference data "
                                   "(targets, curve, prize ceilings, names, area managers, footfall)")
+    ap.add_argument("--months", help="with --api: JSON config to build a multi-month race board "
+                                     "(month dropdown + October winners page). See data/months.json")
     ap.add_argument("--asof", help="last day in the data (YYYY-MM-DD); needed for the single-total export, "
                                    "optional with --api (default: today)")
     ap.add_argument("--out", default=os.path.join(ROOT, "site"))
@@ -197,7 +200,63 @@ def serve(a):
         print("Stopped.")
 
 
+def _month_asof(ym, explicit):
+    """Last GCC day to include for a month: explicit if given, else today for the current month
+    or the month's last calendar day for a past month."""
+    if explicit:
+        return explicit
+    y, mo = map(int, ym.split("-"))
+    today = gcc_today()
+    if (today.year, today.month) == (y, mo):
+        return None                                      # current month: read_race_api uses today
+    return f"{ym}-{calendar.monthrange(y, mo)[1]:02d}"    # past month: full month
+
+
+def build_multi(a, refresh=None):
+    """Multi-month race board: build each month's D and embed them keyed by YYYY-MM, so the page's
+    dropdown can switch months and show October's winners page after the reveal date."""
+    from athar.api_race import read_race_api
+    cfg = json.load(open(a.months, encoding="utf-8"))
+    months, winners_months = {}, []
+    default_raw = None
+    for m in cfg["months"]:
+        ym, ref = m["ym"], m["ref"]
+        try:
+            stores, daily, targets, src_asof, extra = read_race_api(ref, _month_asof(ym, m.get("asof")))
+        except Exception as e:
+            sys.exit(f"Month {ym}: sales API failed: {e}")
+        elapsed = None
+        if src_asof == gcc_today().isoformat():          # current month still running: pace on finished days
+            elapsed = max(1, int(src_asof[-2:]) - 1)
+        D = race_data(stores, daily, targets, src_asof, elapsed, extra)
+        D["built"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+        D["tz"] = os.environ.get("ODOO_TZ") or "Asia/Riyadh"
+        months[ym] = D
+        if m.get("winners"):
+            winners_months.append(ym)
+        if ym == cfg["default"]:
+            default_raw = (stores, daily, targets, src_asof, elapsed)
+
+    container = {"default": cfg["default"], "winnersFrom": cfg.get("winners_from"),
+                 "winnersMonths": winners_months, "monthNames": cfg.get("month_names", {}),
+                 "months": months}
+    os.makedirs(os.path.join(a.out, "data"), exist_ok=True)
+    render(os.path.join(ROOT, "templates", "race.html"), container, os.path.join(a.out, "index.html"), refresh)
+    json.dump(container, open(os.path.join(a.out, "data", "race.json"), "w", encoding="utf-8"), ensure_ascii=False)
+
+    if default_raw:                                      # public board (percentages only) for the default month
+        stores, daily, targets, asof, elapsed = default_raw
+        pub = public_data(stores, daily, targets, asof, elapsed)
+        pub["built"], pub["tz"] = months[cfg["default"]]["built"], months[cfg["default"]]["tz"]
+        render(os.path.join(ROOT, "templates", "public.html"), pub, os.path.join(a.out, "public.html"), refresh)
+        json.dump(pub, open(os.path.join(a.out, "data", "public.json"), "w", encoding="utf-8"), ensure_ascii=False)
+    print(f"Built months: {', '.join(months)} (default {cfg['default']}, winners {winners_months or 'none'})")
+    print("Written to", a.out)
+
+
 def build(a, refresh=None):
+    if a.months:
+        return build_multi(a, refresh)
     extra = None
     bundled = False                                      # targets + asof already set (master / --api --ref)
     if a.master:
