@@ -973,7 +973,14 @@ function fmtUpd(){ if(!D.built) return '—'; const dt=new Date(D.built);
 function monthDeadline(){ const off=(D.tz==='Asia/Dubai'||D.tz==='Asia/Muscat')?4:3;   // GCC has no DST
   const [yy,mm]=MONTH.split('-').map(Number); return Date.UTC(yy,mm,1,0,0,0)-off*3600*1000; }   // end of the selected month
 let DEADLINE=0;
-function tickCD(){ let s=Math.max(0,Math.floor((DEADLINE-Date.now())/1000));
+const CD_SHOW_DAYS=7;                 // only show the countdown in the final 7 days before the month closes
+function tickCD(){
+  const remain=DEADLINE-Date.now();
+  const cd=document.querySelector('.cd');
+  const show=remain>0 && remain<=CD_SHOW_DAYS*86400*1000;
+  if(cd) cd.style.display = show ? '' : 'none';
+  if(!show) return;
+  let s=Math.floor(remain/1000);
   const d=Math.floor(s/86400); s-=d*86400; const h=Math.floor(s/3600); s-=h*3600; const m=Math.floor(s/60); s-=m*60;
   const q={d,h,m,s}; for(const k in q){ const e=document.querySelector(`#hCountdown [data-cd="${k}"]`); if(e) e.textContent=String(q[k]).padStart(2,'0'); } }
 
