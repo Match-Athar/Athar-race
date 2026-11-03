@@ -90,7 +90,10 @@ The board builds **one page with a month dropdown**, driven by `data/months.json
 2. Add a line to `data/months.json` (and set `"default"` / `"winners"` as you want).
 3. Push. The `data/**` path triggers a rebuild.
 
-> **November targets are currently a placeholder** (a copy of October). Replace `data/master-2026-11.xlsx` with the real November targets workbook — same structure as the October one — then push.
+> November targets (`data/master-2026-11.xlsx`) hold the **real** November plan (114 branches,
+> 30-day curve) converted from "November Daily Targets 2026 with Prize.xlsx". Sales, staff and
+> last-year come from the live API; footfall reuses October's as a placeholder until a November
+> footfall sheet is available (it only affects the conversion metric).
 
 ## Notes
 
