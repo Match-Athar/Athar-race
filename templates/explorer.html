@@ -362,7 +362,7 @@ body.winners-mode{background:
   <div class="mark"><b data-t="brand">مسابقة أثر</b><small id="brandSub">MATCH</small></div>
   <div class="clock">
     <div><span data-t="dataTo">البيانات حتى</span><b id="hAsOf">—</b></div>
-    <div><span data-t="announce">إعلان النتائج</span><b id="hAnn">—</b></div>
+    <div id="hAnnWrap"><span data-t="announce">إعلان النتائج</span><b id="hAnn">—</b></div>
     <div><span data-t="updated">آخر تحديث</span><b id="hUpd">—</b></div>
     <div class="msel"><span data-t="monthLbl">الشهر</span><select id="mSel" aria-label="Month"></select></div>
     <div class="tog" role="group"><button id="bAr" aria-pressed="true">عربي</button><button id="bEn" aria-pressed="false">EN</button></div>
@@ -577,6 +577,7 @@ function header(){
   const[y,m,d]=D.asOf.split('-').map(Number);
   $('hAsOf').textContent=new Date(y,m-1,d).toLocaleDateString(LOC(),{day:'numeric',month:'short'});
   $('hAnn').textContent=EMBED.winnersFrom?new Date(EMBED.winnersFrom+'T00:00:00').toLocaleDateString(LOC(),{day:'numeric',month:'short'}):'—';
+  const annWrap=$('hAnnWrap'); if(annWrap) annWrap.style.display=((EMBED.winnersMonths||[]).includes(MONTH)&&EMBED.winnersFrom)?'':'none';  // "Results" date only for the winners month
   $('hUpd').textContent=fmtUpd();
 }
 function fillMonths(){const s=$('mSel');s.innerHTML=Object.keys(EMBED.months).map(k=>`<option value="${k}"${k===MONTH?' selected':''}>${monthName(k)}</option>`).join('');}
