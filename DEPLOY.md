@@ -85,6 +85,17 @@ The board builds **one page with a month dropdown**, driven by `data/months.json
 - A month marked `"winners": true` shows a **prize-winners page** (car + each phone/iPad/watch/gold seat: branch + its top employee) **instead of** its race board, but only on/after `winners_from`. Before that date, selecting it shows its normal race board.
 - The countdown and all labels follow the selected month automatically — **no code edit needed** for a new month.
 
+### Previewing the winners page early (management cross-check)
+
+Before the public `winners_from` date, add `?preview` to the URL to unlock the winners
+page for internal review, with `?m=YYYY-MM` to open a specific month. A gold banner marks
+it as "not public yet"; the public link (no `?preview`) still shows the race board until
+the date. Example:
+
+```
+https://<account>.github.io/<repo>/?preview&m=2026-10
+```
+
 ### Adding a new month
 1. Add its workbook, e.g. `data/master-2026-12.xlsx`.
 2. Add a line to `data/months.json` (and set `"default"` / `"winners"` as you want).

@@ -20,6 +20,7 @@ import json
 import argparse
 import calendar
 import time
+import shutil
 import threading
 import http.server
 
@@ -242,7 +243,13 @@ def build_multi(a, refresh=None):
                  "months": months}
     os.makedirs(os.path.join(a.out, "data"), exist_ok=True)
     render(os.path.join(ROOT, "templates", "race.html"), container, os.path.join(a.out, "index.html"), refresh)
+    explorer = os.path.join(ROOT, "templates", "explorer.html")   # new interactive page, same live data
+    if os.path.isfile(explorer):
+        render(explorer, container, os.path.join(a.out, "explorer.html"), refresh)
     json.dump(container, open(os.path.join(a.out, "data", "race.json"), "w", encoding="utf-8"), ensure_ascii=False)
+    media = os.path.join(ROOT, "templates", "media")           # static assets (e.g. the CEO voice note)
+    if os.path.isdir(media):
+        shutil.copytree(media, os.path.join(a.out, "media"), dirs_exist_ok=True)
 
     if default_raw:                                      # public board (percentages only) for the default month
         stores, daily, targets, asof, elapsed = default_raw

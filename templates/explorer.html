@@ -1,0 +1,903 @@
+<style>html{color-scheme:light}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>مسابقة أثر · MATCH Explorer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@500;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Cinzel:wght@500;600;800&display=swap">
+<style>
+:root{
+  --bg:#F3F5F4; --surface:#FFFFFF; --sunk:#E7ECEA; --ink:#0F2A2A; --muted:#55706D; --line:#D3DDDA;
+  --brand:#0E4D4A; --brand-ink:#FFFFFF; --gold:#B7842A; --gold-soft:#F4E7CC;
+  --good:#1E7F52; --good-soft:#DDF1E6; --warn:#A86A06; --warn-soft:#FBEBCB; --bad:#B23B30; --bad-soft:#F7DEDA;
+  --on-gold:#FFFFFF; --t-car:#B7842A; --t-phone:#2E5FA8; --t-ipad:#6B4BA3; --t-watch:#1E7F72; --t-gold:#9A6B12;
+  --f-display:"Reem Kufi","IBM Plex Sans Arabic",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans Arabic",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-num:"IBM Plex Mono",ui-monospace,Menlo,monospace; --f-serif:"Cinzel",Georgia,serif; --r:12px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0B1817; --surface:#112423; --sunk:#0E1F1E; --ink:#E4EEEC; --muted:#8FA9A5; --line:#22403D;
+  --brand:#5FC0B4; --brand-ink:#06201E; --gold:#E2B45A; --gold-soft:#3A2E16;
+  --good:#5BC98F; --good-soft:#123527; --warn:#E5A93D; --warn-soft:#3A2A0C; --bad:#EC7B6F; --bad-soft:#3D1A16;
+  --on-gold:#2A1C04; --t-car:#E2B45A; --t-phone:#7FA7EA; --t-ipad:#B49AE6; --t-watch:#5FC0B4; --t-gold:#D9A94C; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0B1817; --surface:#112423; --sunk:#0E1F1E; --ink:#E4EEEC; --muted:#8FA9A5; --line:#22403D;
+  --brand:#5FC0B4; --brand-ink:#06201E; --gold:#E2B45A; --gold-soft:#3A2E16;
+  --good:#5BC98F; --good-soft:#123527; --warn:#E5A93D; --warn-soft:#3A2A0C; --bad:#EC7B6F; --bad-soft:#3D1A16;
+  --on-gold:#2A1C04; --t-car:#E2B45A; --t-phone:#7FA7EA; --t-ipad:#B49AE6; --t-watch:#5FC0B4; --t-gold:#D9A94C; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55}
+.num{font-family:var(--f-num);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+h1,h2,h3{margin:0;font-family:var(--f-display);font-weight:700;letter-spacing:-.01em}
+button{font:inherit;cursor:pointer}
+.wrap{max-width:1180px;margin:0 auto;padding:0 18px}
+
+/* header */
+.top{background:var(--brand);color:var(--brand-ink);position:sticky;top:0;z-index:30}
+.top .wrap{display:flex;align-items:center;gap:16px;padding:12px 18px;flex-wrap:nowrap}
+.mark{display:flex;flex-direction:column;line-height:1.1}
+.mark b{font-family:var(--f-display);font-size:1.4rem}
+.mark small{font-size:.74rem;opacity:.85}
+.clock{margin-inline-start:auto;display:flex;align-items:center;gap:14px;flex-wrap:nowrap}
+.clock>div{display:flex;flex-direction:column;font-size:.64rem;opacity:.85;text-transform:uppercase;letter-spacing:.04em}
+.clock>div b{font-family:var(--f-num);font-size:.9rem;opacity:1}
+.msel{display:flex;flex-direction:column;gap:2px;font-size:.64rem;opacity:.9;text-transform:uppercase;letter-spacing:.04em}
+.msel select{font:inherit;font-family:var(--f-display);font-size:.98rem;font-weight:700;background:rgba(255,255,255,.14);color:var(--brand-ink);border:1px solid rgba(255,255,255,.35);border-radius:9px;padding:4px 10px;cursor:pointer}
+.msel select option{color:#111}
+.tog{display:flex;gap:4px}
+.tog button,.iconbtn{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);color:var(--brand-ink);border-radius:9px;padding:6px 11px;font-size:.8rem;font-weight:600}
+.tog button[aria-pressed="true"]{background:var(--gold);color:var(--on-gold);border-color:var(--gold)}
+.iconbtn{width:38px;height:38px}
+
+/* KPI ribbon */
+.ribbon{background:var(--surface);border-bottom:1px solid var(--line)}
+.ribbon .wrap{display:flex;align-items:center;gap:18px;padding:14px 18px;flex-wrap:wrap}
+.rring{width:66px;height:66px;flex:none;position:relative}
+.rring svg{transform:rotate(-90deg)}.rring .bg{fill:none;stroke:var(--sunk);stroke-width:7}
+.rring .fg{fill:none;stroke:var(--gold);stroke-width:7;stroke-linecap:round;stroke-dasharray:201;stroke-dashoffset:201;transition:stroke-dashoffset 1.1s cubic-bezier(.2,.7,.3,1)}
+.rring b{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--f-num);font-size:.84rem;font-weight:700}
+.rlede{font-size:1.02rem;font-weight:500;max-width:44ch}.rlede .hi{color:var(--gold);font-weight:700}.rlede .hi2{color:var(--brand);font-weight:700}
+.rkpis{margin-inline-start:auto;display:flex;gap:10px;flex-wrap:wrap}
+.rk{background:var(--sunk);border:1px solid var(--line);border-radius:11px;padding:8px 14px;min-width:92px}
+.rk .k{font-size:.6rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.rk .v{font-family:var(--f-num);font-size:1.25rem;font-weight:700;margin-top:2px}
+.rk .v.good{color:var(--good)}.rk .v.warn{color:var(--warn)}
+
+/* section header */
+section{padding:28px 0;border-top:1px solid var(--line)}
+.sh{margin-bottom:18px}
+.sh .ey{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);display:inline-flex;align-items:center;gap:8px}
+.sh .ey::before{content:"";width:18px;height:1px;background:var(--gold);opacity:.7}
+.sh h2{font-size:1.5rem;margin:8px 0 0}
+.sh p{margin:6px 0 0;color:var(--muted);font-size:.9rem;max-width:72ch}
+
+/* ===== prize board (brought to top) ===== */
+#prizes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.pz-card{position:relative;overflow:hidden;border-radius:18px;padding:20px;--tc:var(--gold);background:linear-gradient(160deg,var(--surface),var(--sunk));border:1px solid var(--line);
+  opacity:0;transform:translateY(20px) scale(.98);transition:transform .4s cubic-bezier(.2,.7,.3,1),box-shadow .35s,border-color .35s,opacity .5s}
+.pz-card.in{opacity:1;transform:none}
+.pz-card[data-open]{cursor:pointer}
+.pz-card.feat{grid-column:1/-1;padding:26px 28px;border-color:color-mix(in srgb,var(--tc) 55%,var(--line))}
+.pz-card.feat .pz-center{gap:30px}
+.pz-card.feat::before{content:"";position:absolute;inset:-1px;border-radius:19px;padding:1px;pointer-events:none;z-index:1;background:linear-gradient(120deg,transparent,var(--tc),transparent,var(--tc),transparent);background-size:300%;-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:pzBorder 4s linear infinite}
+@keyframes pzBorder{to{background-position:300%}}
+.pz-card:hover{border-color:var(--tc);box-shadow:0 22px 46px -24px rgba(0,0,0,.6)}
+.pz-card::after{content:"";position:absolute;top:-60%;inset-inline-start:-30%;width:45%;height:220%;z-index:2;pointer-events:none;background:linear-gradient(100deg,transparent,color-mix(in srgb,var(--ink) 12%,transparent),transparent);transform:rotate(16deg);animation:pzSweep 5.5s ease-in-out infinite}
+@keyframes pzSweep{0%{inset-inline-start:-40%}55%,100%{inset-inline-start:135%}}
+.pz-spin{position:absolute;inset:-40%;border-radius:50%;pointer-events:none;opacity:0;z-index:0;background:conic-gradient(from 0deg,transparent,color-mix(in srgb,var(--tc) 22%,transparent),transparent 42%,color-mix(in srgb,var(--tc) 16%,transparent),transparent 72%)}
+.pz-card.won .pz-spin{opacity:1;animation:pzSpin 7s linear infinite}@keyframes pzSpin{to{transform:rotate(360deg)}}
+.pz-halo{position:absolute;inset:0;border-radius:18px;pointer-events:none;opacity:0;z-index:0;box-shadow:inset 0 0 64px -12px var(--tc)}
+.pz-card.near .pz-halo{opacity:.45;animation:pzBreathe 2.3s ease-in-out infinite}.pz-card.won .pz-halo{opacity:.7}
+@keyframes pzBreathe{0%,100%{opacity:.26}50%{opacity:.6}}
+.pz-body{position:relative;z-index:3}
+.pz-top{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.pz-tier{width:28px;height:28px;border-radius:8px;background:var(--tc);color:var(--on-gold);display:grid;place-items:center;font-weight:800;font-size:.85rem;font-family:var(--f-num)}
+.pz-top h3{font-size:1.1rem}
+.pz-seats{margin-inline-start:auto;font-size:.72rem;color:var(--muted);background:var(--sunk);border:1px solid var(--line);padding:3px 10px;border-radius:99px}
+.pz-center{display:flex;align-items:center;gap:18px}
+.pz-ringbox{position:relative;width:128px;height:128px;flex:none}.feat .pz-ringbox{width:180px;height:180px}
+.pz-ring{position:absolute;inset:0;transform:rotate(-90deg)}
+.pz-ring .pz-bg{fill:none;stroke:var(--sunk);stroke-width:9}
+.pz-ring .pz-fg{fill:none;stroke:var(--tc);stroke-width:9;stroke-linecap:round;stroke-dasharray:327;stroke-dashoffset:327;transition:stroke-dashoffset 1.5s cubic-bezier(.2,.7,.3,1);filter:drop-shadow(0 0 5px color-mix(in srgb,var(--tc) 70%,transparent))}
+.feat .pz-ring .pz-fg,.feat .pz-ring .pz-bg{stroke-width:11}
+.pz-tipwrap{position:absolute;inset:0}.pz-tip{transform-origin:69px 69px;transition:transform 1.5s cubic-bezier(.2,.7,.3,1)}
+.pz-tip circle{fill:var(--tc);filter:drop-shadow(0 0 6px var(--tc))}
+.pz-ico{position:absolute;inset:0;display:grid;place-items:center;color:var(--tc);font-size:1.9rem;animation:pzFloat 4s ease-in-out infinite}
+.feat .pz-ico{font-size:3rem}@keyframes pzFloat{0%,100%{transform:translateY(-4px)}50%{transform:translateY(4px)}}
+.pz-txt{flex:1;min-width:0;line-height:1.14}
+.pz-txt>b{display:block;font-family:var(--f-num);font-size:1.9rem;font-weight:700}.feat .pz-txt>b{font-size:2.5rem}
+.pz-txt small{color:var(--muted);font-size:.78rem}
+.pz-motiv{margin-top:12px;font-weight:700;font-size:.9rem;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.pz-motiv .pz-gap{color:var(--tc);font-family:var(--f-num);font-size:1.1rem}.near .pz-motiv{color:var(--tc)}
+.pz-dot{width:8px;height:8px;border-radius:50%;background:var(--tc)}.near .pz-dot{animation:pzPulse 1.1s ease-in-out infinite}
+@keyframes pzPulse{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--tc) 60%,transparent)}50%{box-shadow:0 0 0 8px transparent}}
+.pz-won{display:inline-flex;align-items:center;gap:7px;margin-top:12px;font-weight:800;font-size:.85rem;color:var(--on-gold);background:var(--tc);padding:7px 13px;border-radius:11px}
+.pz-lead{margin-top:11px;font-weight:700;font-size:.95rem}.pz-lead small{display:block;color:var(--muted);font-weight:400;font-size:.76rem}
+.pz-list{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px;position:relative;z-index:3}
+.pz-chip{font-size:.75rem;padding:4px 10px;border-radius:99px;background:var(--sunk);border:1px solid var(--line)}
+
+/* ticker */
+.ticker{display:flex;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface)}
+.ticker .lead{background:var(--gold);color:var(--on-gold);font-size:.66rem;letter-spacing:.07em;text-transform:uppercase;display:flex;align-items:center;gap:7px;padding:0 14px;font-weight:700;white-space:nowrap}
+.ticker .lead .d{width:6px;height:6px;border-radius:50%;background:var(--on-gold);animation:tkping 1.6s ease-out infinite}
+@keyframes tkping{0%{box-shadow:0 0 0 0 rgba(0,0,0,.35)}100%{box-shadow:0 0 0 7px transparent}}
+.ticker .feed{flex:1;overflow:hidden;position:relative;display:flex;align-items:center;-webkit-mask-image:linear-gradient(90deg,transparent,#000 3%,#000 97%,transparent);mask-image:linear-gradient(90deg,transparent,#000 3%,#000 97%,transparent)}
+.ticker .run{display:flex;gap:28px;white-space:nowrap;padding:9px 16px;animation:tkscroll 34s linear infinite}
+.ticker:hover .run{animation-play-state:paused}
+@keyframes tkscroll{to{transform:translateX(-50%)}}
+[dir="rtl"] .ticker .run{animation-name:tkscrollr}@keyframes tkscrollr{to{transform:translateX(50%)}}
+.ti{display:inline-flex;align-items:center;gap:8px;font-size:.82rem}
+.ti .tg{font-size:.6rem;font-weight:700;letter-spacing:.05em;color:var(--gold);text-transform:uppercase}
+.ti b{color:var(--brand);font-weight:700}.ti .pts{font-family:var(--f-num);font-size:.74rem;color:var(--good)}
+
+/* finder */
+.finder{background:linear-gradient(135deg,color-mix(in srgb,var(--brand) 13%,var(--surface)),var(--surface));border:1px solid var(--line);border-radius:18px;padding:22px}
+.fbar{position:relative;max-width:540px}
+.fbar input{width:100%;background:var(--bg);border:1.5px solid var(--line);border-radius:12px;color:var(--ink);padding:13px 16px;font:inherit;font-size:1.02rem}
+.fbar input:focus{outline:2px solid var(--gold);outline-offset:1px}
+.fsugg{position:absolute;inset-inline:0;top:calc(100% + 6px);background:var(--surface);border:1px solid var(--line);border-radius:12px;z-index:6;overflow:hidden;box-shadow:0 14px 40px -16px rgba(0,0,0,.5);max-height:320px;overflow-y:auto}
+.fsugg button{display:flex;width:100%;gap:10px;align-items:center;text-align:start;background:none;border:0;border-bottom:1px solid var(--line);padding:10px 14px;color:var(--ink)}
+.fsugg button:hover{background:var(--sunk)}.fsugg b{font-weight:700;font-size:.9rem}.fsugg small{color:var(--muted);font-size:.76rem}
+.fcard{display:grid;grid-template-columns:160px 1fr;gap:24px;align-items:center;margin-top:18px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px;animation:fade .3s ease}
+.fring{position:relative;width:160px;height:160px;flex:none}
+.fring svg{transform:rotate(-90deg)}.fring .bg{fill:none;stroke:var(--sunk);stroke-width:12}
+.fring .fg{fill:none;stroke:var(--gold);stroke-width:12;stroke-linecap:round;stroke-dasharray:433;stroke-dashoffset:433;transition:stroke-dashoffset 1s cubic-bezier(.2,.7,.3,1)}
+.fring .c{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.fring .c b{font-family:var(--f-num);font-size:1.8rem;font-weight:700;line-height:1}.fring .c small{font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:4px}
+.fmain h3{font-size:1.4rem}.fmain .loc{color:var(--muted);font-size:.88rem;margin-top:2px}
+.fstats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+.fstats .s{background:var(--sunk);border:1px solid var(--line);border-radius:10px;padding:9px 11px}
+.fstats .s .k{font-size:.58rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.fstats .s .v{font-family:var(--f-num);font-weight:700;font-size:1.05rem;margin-top:3px}
+.fhint{margin-top:12px;font-size:.88rem;color:var(--muted)}.fhint b{color:var(--gold)}
+.fprompt{color:var(--muted);margin-top:16px;font-size:.9rem}
+.fteam{grid-column:1/-1;border-top:1px solid var(--line);margin-top:8px;padding-top:14px}
+.fteam .dt{font-size:.64rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:10px;display:flex;justify-content:space-between}
+.trow2{display:grid;grid-template-columns:160px 1fr 52px;gap:12px;align-items:center;padding:5px 0}
+.trow2 .nmc{font-size:.86rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:flex;align-items:center;gap:7px}
+.trow2 .mdl{width:20px;height:20px;border-radius:6px;background:var(--sunk);border:1px solid var(--line);display:grid;place-items:center;font-size:.64rem;font-weight:700;color:var(--gold);font-family:var(--f-num);flex:none}
+.trow2 .tbar{height:8px;background:var(--sunk);border-radius:99px;overflow:hidden}
+.trow2 .tbar i{display:block;height:100%;background:linear-gradient(90deg,var(--brand),var(--gold));border-radius:99px;transition:width .6s ease}
+.trow2 .tp{font-family:var(--f-num);font-weight:700;font-size:.82rem;text-align:end}
+.trow2 .eno{color:var(--muted);font-weight:400;font-size:.78rem}
+.trow2.dim{opacity:.72}.trow2.dim .tbar i{background:var(--muted)}
+.trow2.ttot{border-top:1.5px solid color-mix(in srgb,var(--ink) 22%,var(--line));margin-top:5px;padding-top:9px}
+.trow2.ttot .nmc{font-weight:800}.trow2.ttot .tp{color:var(--gold);font-size:.9rem}
+.pz-lead .lnk,.pz-chip[data-open]{cursor:pointer}
+.pz-lead .lnk:hover{text-decoration:underline;text-decoration-color:var(--tc)}
+.pz-chip[data-open]:hover{border-color:var(--tc);color:var(--ink)}
+
+/* map */
+.mapwrap{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;align-items:start}
+.mapcard{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:16px;padding:14px;
+  background:radial-gradient(130% 95% at 50% 0%, color-mix(in srgb,var(--brand) 11%,var(--surface)), var(--surface) 72%)}
+.mapcard svg{width:100%;height:auto;display:block;overflow:visible}
+.land{fill:color-mix(in srgb,var(--brand) 16%,transparent);stroke:color-mix(in srgb,var(--brand) 42%,transparent);stroke-width:1;stroke-linejoin:round}
+.graticule{stroke:color-mix(in srgb,var(--ink) 8%,transparent);stroke-width:.5}
+.bub{cursor:pointer}
+.bub .halo{opacity:.14;transition:opacity .15s}
+.bub:hover .halo{opacity:.32}
+.bub .dot{transition:transform .15s;transform-box:fill-box;transform-origin:center}
+.bub:hover .dot{transform:scale(1.18)}
+.blab{font-family:var(--f-num);font-size:7px;fill:var(--ink);opacity:.7}
+.mtip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);padding:6px 11px;border-radius:9px;font-size:.74rem;opacity:0;transition:opacity .12s;white-space:nowrap;z-index:6;transform:translate(-50%,calc(-100% - 12px));box-shadow:0 8px 20px -8px rgba(0,0,0,.6)}
+.mtip b{font-family:var(--f-display)}
+.mlegend{display:flex;gap:16px;margin-top:10px;font-size:.66rem;color:var(--muted)}
+.mlegend i{width:9px;height:9px;border-radius:50%;display:inline-block;margin-inline-end:5px;vertical-align:middle}
+.mcity{cursor:default;border-radius:9px;padding-inline:6px;transition:background .12s}
+.mcity.hot{background:var(--sunk)}
+@media (max-width:860px){.fcard{grid-template-columns:1fr}.mapwrap{grid-template-columns:1fr}}
+
+/* ===== tabs + explorer ===== */
+.tabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin-bottom:18px}
+.tab{background:none;border:0;color:var(--muted);padding:12px 14px;font-size:.92rem;font-weight:600;position:relative;border-radius:8px 8px 0 0}
+.tab:hover{color:var(--ink)}.tab.on{color:var(--ink)}
+.tab.on::after{content:"";position:absolute;inset-inline:12px;bottom:-1px;height:2px;background:var(--gold);border-radius:2px}
+.view{display:none;animation:fade .3s ease}.view.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip-f{border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:99px;padding:7px 13px;font-size:.8rem;font-weight:600}
+.chip-f.on{background:var(--gold);color:var(--on-gold);border-color:var(--gold)}
+.sel{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:9px;padding:8px 10px;font:inherit;font-size:.82rem}
+.sbox{position:relative}.sbox input{background:var(--surface);border:1px solid var(--line);border-radius:9px;color:var(--ink);padding:8px 12px;font:inherit;font-size:.84rem;width:220px}
+.summary{margin-inline-start:auto;font-size:.8rem;color:var(--muted)}.summary b{color:var(--ink)}
+.lead{background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.lhead,.lmain{display:grid;grid-template-columns:40px 1fr 150px 80px 120px 50px;gap:12px;align-items:center}
+.lhead{padding:11px 16px;border-bottom:1px solid var(--line);font-size:.64rem;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.lhead button{background:none;border:0;color:inherit;font:inherit;letter-spacing:inherit;text-transform:inherit;padding:0}
+.lhead button.s{color:var(--gold)}
+.lrow{border-bottom:1px solid var(--line)}
+.lmain{padding:12px 16px;cursor:pointer;transition:background .15s}.lmain:hover,.lrow.open .lmain{background:var(--sunk)}
+.pos{font-family:var(--f-num);font-weight:700;color:var(--muted)}.pos.p1{color:var(--gold)}
+.bname b{font-weight:700}.bname small{display:block;color:var(--muted);font-size:.74rem}
+.abar{position:relative;height:8px;background:var(--sunk);border-radius:99px;overflow:hidden}
+.abar i{position:absolute;inset-block:0;inset-inline-start:0;border-radius:99px;background:linear-gradient(90deg,var(--brand),var(--gold));transition:width .5s ease}
+.apct{font-family:var(--f-num);font-weight:700;margin-top:3px;font-size:.84rem}
+.tierchip{font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:6px;border:1px solid currentColor}
+.cA{color:var(--t-car)}.cB{color:var(--t-phone)}.cC{color:var(--t-ipad)}.cD{color:var(--t-watch)}.cE{color:var(--t-gold)}
+.stat-z{font-size:.68rem;padding:2px 8px;border-radius:99px;background:var(--sunk);border:1px solid var(--line);color:var(--muted)}
+.stat-z.zone{color:var(--good)}.stat-z.near{color:var(--gold)}
+.caret{color:var(--muted);transition:transform .2s;text-align:center}.lrow.open .caret{transform:rotate(180deg)}
+.detail{max-height:0;overflow:hidden;transition:max-height .35s ease}.lrow.open .detail{max-height:260px}
+.dinner{padding:4px 16px 18px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px}
+.dblock .dt{font-size:.64rem;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.drow{display:flex;justify-content:space-between;padding:6px 0;border-top:1px solid var(--line);font-size:.85rem}.drow:first-child{border-top:0}.drow span{color:var(--muted)}
+.sparkbars{display:flex;gap:6px;align-items:flex-end;height:54px}.sparkbars .sb{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.sparkbars i{width:100%;background:color-mix(in srgb,var(--brand) 55%,transparent);border-radius:3px 3px 0 0}
+.sparkbars small{font-size:.6rem;color:var(--muted)}
+.av{width:24px;height:24px;border-radius:50%;background:var(--sunk);border:1px solid var(--line);display:inline-grid;place-items:center;font-size:.7rem;font-weight:700;color:var(--gold);vertical-align:middle;margin-inline-end:6px}
+.empty{padding:40px;text-align:center;color:var(--muted)}
+/* mini lists (overview/people/areas) */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px 18px}
+.mini{display:grid;grid-template-columns:24px 1fr auto;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--line)}
+.mini:first-child{border-top:0}
+.mini .rk2{width:24px;height:24px;border-radius:7px;background:var(--sunk);border:1px solid var(--line);display:grid;place-items:center;font-size:.72rem;font-weight:700;color:var(--muted);font-family:var(--f-num)}
+.mini .rk2.r1{background:var(--gold);color:var(--on-gold);border-color:var(--gold)}
+.mini b{font-weight:700;font-size:.9rem}.mini small{display:block;color:var(--muted);font-size:.74rem}
+.mini .r{font-family:var(--f-num);font-weight:700}.mini .r.good{color:var(--good)}.mini .r.bad{color:var(--bad)}
+.seg{display:inline-flex;background:var(--sunk);border:1px solid var(--line);border-radius:10px;padding:3px;gap:3px;margin-bottom:14px}
+.seg button{background:none;border:0;color:var(--muted);padding:7px 14px;border-radius:7px;font-size:.84rem;font-weight:600}
+.seg button.on{background:var(--surface);color:var(--ink)}
+.track{position:relative;height:12px;background:var(--sunk);border-radius:99px;overflow:hidden}
+.track i{position:absolute;inset-block:0;inset-inline-start:0;border-radius:99px;background:linear-gradient(90deg,var(--brand),var(--gold))}
+.track .goal{position:absolute;inset-block:-3px;width:2px;background:var(--line)}
+.rules{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.rule{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px}
+.rule .ic{width:32px;height:32px;border-radius:8px;background:var(--sunk);border:1px solid var(--line);display:grid;place-items:center;color:var(--gold);font-weight:700;font-family:var(--f-num)}
+.rule h3{font-size:.98rem;margin:12px 0 4px}.rule p{margin:0;color:var(--muted);font-size:.84rem}
+
+/* featured: car racetrack */
+.crace{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:6px 18px}
+.crow{display:grid;grid-template-columns:34px 170px 1fr 92px;gap:14px;align-items:center;padding:13px 0;border-bottom:1px solid var(--line)}
+.crow:last-child{border-bottom:0}
+.crow .nm b{font-weight:700}.crow .nm small{display:block;color:var(--muted);font-size:.74rem}
+.clane{position:relative;height:30px;background:var(--sunk);border-radius:99px}
+.clane .fill{position:absolute;inset-block:0;inset-inline-start:0;border-radius:99px;background:linear-gradient(90deg,color-mix(in srgb,var(--brand) 65%,transparent),var(--gold));transition:width .7s cubic-bezier(.2,.7,.3,1)}
+.clane .finish{position:absolute;inset-block:-5px;border-inline-start:2px dashed var(--gold)}
+.clane .carmk{position:absolute;top:50%;transform:translate(-50%,-50%);transition:inset-inline-start .7s cubic-bezier(.2,.7,.3,1);filter:drop-shadow(0 2px 3px rgba(0,0,0,.3))}
+[dir="rtl"] .clane .carmk{transform:translate(50%,-50%) scaleX(-1)}
+.crow .cp{text-align:end;font-family:var(--f-num);font-weight:700;font-size:1.02rem}.crow .cp small{display:block;font-weight:500;color:var(--muted);font-size:.68rem;font-family:var(--f-body)}
+/* featured: movers cards */
+.mv2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.mvcard{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px 18px}
+.mvcard .h{display:flex;align-items:center;gap:9px;font-weight:700;font-family:var(--f-display);font-size:1.05rem;margin-bottom:6px}
+.mvcard .h .ic{width:28px;height:28px;border-radius:8px;background:var(--sunk);border:1px solid var(--line);display:grid;place-items:center;color:var(--gold);font-size:.9rem}
+.mvrow{display:grid;grid-template-columns:26px 1fr auto;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.mvrow b{font-weight:700;font-size:.9rem}.mvrow small{display:block;color:var(--muted);font-size:.74rem}
+.mvbadge{display:inline-flex;align-items:center;gap:4px;font-family:var(--f-num);font-weight:700;padding:4px 10px;border-radius:99px;font-size:.84rem}
+.mvbadge.up{color:var(--good);background:var(--good-soft)}.mvbadge.dn{color:var(--bad);background:var(--bad-soft)}
+@media (max-width:860px){.mv2{grid-template-columns:1fr}.crow{grid-template-columns:30px 110px 1fr 70px}}
+
+/* ===== winners view ===== */
+#winnersView{display:none}
+body.winners-mode #winnersView{display:block}
+body.winners-mode .ribbon,body.winners-mode #mainView{display:none}
+#winnersView{padding:0 0 40px;position:relative}
+body.winners-mode{background:
+  radial-gradient(circle at 50% -8%, color-mix(in srgb,var(--gold) 26%,transparent) 0, transparent 55%),
+  radial-gradient(circle at 2% 30%, color-mix(in srgb,var(--brand) 22%,transparent) 0, transparent 44%),
+  radial-gradient(circle at 100% 52%, color-mix(in srgb,var(--gold) 18%,transparent) 0, transparent 42%),
+  radial-gradient(circle at 28% 100%, color-mix(in srgb,var(--brand) 20%,transparent) 0, transparent 46%),
+  var(--bg);background-attachment:fixed}
+#winnersView::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.4;background-image:radial-gradient(var(--gold) 1.2px,transparent 1.6px),radial-gradient(color-mix(in srgb,var(--ink) 55%,transparent) 1px,transparent 1.4px);background-size:46px 46px,73px 73px;background-position:0 0,23px 31px;animation:winTwinkle 4s ease-in-out infinite alternate}
+@keyframes winTwinkle{to{opacity:.14}}
+.win-deco{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.win-deco span{position:absolute;bottom:-60px;font-size:30px;opacity:.5;animation:winRise linear infinite}
+@keyframes winRise{to{transform:translateY(-118vh) rotate(16deg)}}
+.win-wrap{position:relative;z-index:1;display:flex;flex-direction:column;gap:20px;padding-top:18px}
+.win-head{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px}
+.win-mark{width:50px;height:50px;border-radius:13px;background:var(--gold);color:var(--on-gold);display:grid;place-items:center;font-size:26px;flex:none}
+.win-title{font-size:1.9rem}.win-subt{color:var(--muted);font-size:.95rem}
+.win-pills{margin-inline-start:auto;display:flex;flex-wrap:wrap;gap:8px}
+.win-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 13px;border-radius:999px;font-size:.82rem;border:1px solid var(--line);background:var(--surface)}
+.win-pill b{font-family:var(--f-num);color:var(--gold)}
+.win-hero{position:relative;overflow:hidden;isolation:isolate;text-align:center;border-radius:22px;padding:34px 18px 30px;background:radial-gradient(ellipse at top, color-mix(in srgb,var(--gold) 24%,var(--surface)) 0%, var(--surface) 72%);border:1px solid var(--gold);box-shadow:0 0 0 1px var(--gold),0 0 60px -14px var(--gold)}
+.win-hero::before{content:"";position:absolute;left:50%;top:50%;width:1500px;height:1500px;margin:-750px 0 0 -750px;z-index:-1;background:repeating-conic-gradient(color-mix(in srgb,var(--gold) 15%,transparent) 0 6deg,transparent 6deg 18deg);animation:winSpin 60s linear infinite}
+@keyframes winSpin{to{transform:rotate(360deg)}}
+.win-banner{font-size:22px;letter-spacing:2px;margin-bottom:2px}
+.win-htag{color:var(--gold);font-weight:700;font-family:var(--f-display);font-size:1rem}
+.win-ico{font-size:58px;margin-top:6px}
+.win-n{font-family:var(--f-display);font-weight:700;font-size:2.5rem;line-height:1.15;margin-top:2px;background:linear-gradient(90deg,var(--ink),var(--gold),var(--ink));background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:winShine 4s linear infinite}
+@keyframes winShine{to{background-position:200% center}}
+.win-loc{color:var(--muted);font-size:.9rem;margin-top:4px}
+.win-pct{font-family:var(--f-num);font-weight:700;font-size:2.9rem;color:var(--gold);margin-top:8px}
+.win-team{color:var(--muted);font-size:.9rem;margin-top:6px}
+.win-confetti{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:2}
+.win-confetti i{position:absolute;top:-16px;width:8px;height:14px;border-radius:2px;opacity:.9;animation-name:confFall;animation-timing-function:linear;animation-iteration-count:infinite}
+@keyframes confFall{0%{transform:translateY(-16px) rotate(0)}100%{transform:translateY(300px) rotate(380deg)}}
+.ceo{display:flex;align-items:center;gap:14px 18px;flex-wrap:wrap;padding:16px 18px;border-radius:16px;border:1px solid color-mix(in srgb,var(--gold) 45%,var(--line));background:linear-gradient(90deg,color-mix(in srgb,var(--gold) 10%,var(--surface)),var(--surface))}
+.ceo[hidden]{display:none}
+.ceo-mic{width:50px;height:50px;border-radius:50%;background:var(--gold);color:var(--on-gold);display:grid;place-items:center;font-size:24px;flex:none}
+.ceo.playing .ceo-mic{animation:ceoPulse 1.4s ease-in-out infinite}@keyframes ceoPulse{50%{box-shadow:0 0 0 10px color-mix(in srgb,var(--gold) 28%,transparent)}}
+.ceo-txt{flex:1 1 180px}.ceo-txt b{font-family:var(--f-display);font-size:1.05rem}.ceo-hint{font-size:.8rem;color:var(--muted);margin-top:2px}.ceo-hint .tap{color:var(--gold);font-weight:700}
+.ceo audio{flex:1 1 260px;max-width:100%;height:40px}
+.win-cats{display:flex;flex-direction:column;gap:20px}
+.win-sec{position:relative;border:1px solid var(--line);border-top:3px solid var(--gold);border-radius:14px;padding:18px;background:linear-gradient(180deg, color-mix(in srgb,var(--gold) 9%,var(--surface)), var(--surface) 140px)}
+.win-sec h3{display:flex;gap:8px;align-items:baseline;margin:0 0 14px;font-size:1.25rem}.win-sec h3 small{font-family:var(--f-body);font-weight:500;color:var(--muted);font-size:.8rem}
+.win-podium{display:grid;grid-template-columns:repeat(3,1fr);align-items:end;gap:10px;max-width:760px;margin:0 auto}
+.pd{text-align:center;min-width:0}.pd .who{font-family:var(--f-display);font-weight:700;font-size:1.05rem;overflow-wrap:anywhere}
+.pd .where,.pd .emp{font-size:.78rem;color:var(--muted)}
+.pd .blk{margin-top:8px;border-radius:12px 12px 0 0;display:grid;place-items:center;font-family:var(--f-num);font-weight:800;color:#241a06}
+.pd.p1 .blk{height:118px;background:linear-gradient(#F6D98B,#C99A2E);font-size:2.3rem;box-shadow:0 0 28px -4px #f3cf6d}
+.pd.p2 .blk{height:90px;background:linear-gradient(#E2E6EE,#A9B0BD);font-size:1.9rem}
+.pd.p3 .blk{height:70px;background:linear-gradient(#E7A774,#B0703F);font-size:1.6rem}
+.pd .pdpct{font-family:var(--f-num);font-weight:700;color:var(--good);margin-top:6px}
+.win-chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:14px}
+.win-chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:.82rem}.win-chip .pdpct{color:var(--good)}
+.win-empty{color:var(--muted);font-size:.84rem;text-align:center;padding:6px}
+.win-thanks{text-align:center;padding:22px;background:var(--surface);border:1px solid var(--line);border-radius:14px}.win-thanks h3{color:var(--gold);margin:0 0 6px;font-size:1.3rem}
+/* MATCH branding on the winners page */
+.win-logo{height:34px;width:auto;background:#fff;padding:4px 9px;border-radius:7px;flex:none;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+.win-title,.win-n,.win-htag,.win-sec h3,.win-thanks h3{font-family:var(--f-serif);letter-spacing:.015em}
+.win-n{font-weight:800}
+/* curtain reveal */
+.curtain{position:fixed;inset:0;z-index:100;overflow:hidden;background:#0a0807}
+.curtain[hidden]{display:none}
+.curtain::before{content:"";position:absolute;top:0;left:0;right:0;height:16px;z-index:4;background:linear-gradient(#f0cf7e,#8a6321);box-shadow:0 3px 16px rgba(232,190,98,.5)}
+.cpanel{position:absolute;top:0;bottom:0;width:51%;z-index:1;
+  background:repeating-linear-gradient(90deg,#141210 0 15px,#201d1a 15px 33px,#0d0b0a 33px 50px);
+  box-shadow:inset 0 0 140px rgba(0,0,0,.7);transition:transform 1.2s cubic-bezier(.7,0,.2,1)}
+.cleft{left:0;border-right:1px solid rgba(232,190,98,.25)}.cright{right:0;border-left:1px solid rgba(232,190,98,.25)}
+.curtain.open .cleft{transform:translateX(-102%)}.curtain.open .cright{transform:translateX(102%)}
+.cstage{position:absolute;inset:0;z-index:3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding:16px;transition:opacity .5s ease}
+.curtain.open .cstage{opacity:0}
+.cornk{color:var(--gold);letter-spacing:.6em;opacity:.7;font-size:.9rem}
+.clogo{height:58px;background:#fff;padding:7px 14px;border-radius:9px;box-shadow:0 0 50px rgba(232,190,98,.4)}
+.cey{font-family:var(--f-serif);color:var(--gold);letter-spacing:.32em;text-transform:uppercase;font-size:.78rem}
+.ctitle{font-family:var(--f-serif);color:#f3efe9;font-size:clamp(1.1rem,3.6vw,1.6rem);max-width:24ch;line-height:1.5}
+.ccount{font-family:var(--f-serif);color:var(--gold);font-weight:800;font-size:clamp(3rem,10vw,5rem);line-height:1;text-shadow:0 0 36px rgba(232,190,98,.55)}
+.creveal{background:transparent;border:1px solid var(--gold);color:var(--gold);padding:11px 24px;border-radius:999px;font-family:var(--f-serif);letter-spacing:.12em;text-transform:uppercase;font-size:.78rem;cursor:pointer;animation:cpulse 1.9s ease-in-out infinite}
+@keyframes cpulse{50%{box-shadow:0 0 0 7px rgba(232,190,98,.12)}}
+@media (prefers-reduced-motion:reduce){.cpanel,.creveal{animation:none;transition:none}}
+.previewbar{position:fixed;inset-inline:0;bottom:0;z-index:45;background:var(--gold);color:var(--on-gold);text-align:center;padding:9px 16px;font-size:.86rem;font-weight:700;box-shadow:0 -4px 18px rgba(0,0,0,.28)}
+.previewbar[hidden]{display:none}
+@media (max-width:860px){.top .wrap,.clock{flex-wrap:wrap}#prizes{grid-template-columns:1fr}.pz-card.feat{grid-template-columns:1fr}.rules{grid-template-columns:1fr}.lhead,.lmain{grid-template-columns:34px 1fr 110px 44px}.lhead .h3d,.lhead .hpz,.cell-3d,.cell-pz{display:none}.dinner{grid-template-columns:1fr}.sbox input{width:150px}.win-n{font-size:1.9rem}.win-pct{font-size:2.3rem}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}.pz-card{opacity:1;transform:none}.win-deco{display:none}.win-confetti{display:none}}
+</style>
+
+<header class="top"><div class="wrap">
+  <div class="mark"><b data-t="brand">مسابقة أثر</b><small id="brandSub">MATCH</small></div>
+  <div class="clock">
+    <div><span data-t="dataTo">البيانات حتى</span><b id="hAsOf">—</b></div>
+    <div><span data-t="announce">إعلان النتائج</span><b id="hAnn">—</b></div>
+    <div><span data-t="updated">آخر تحديث</span><b id="hUpd">—</b></div>
+    <div class="msel"><span data-t="monthLbl">الشهر</span><select id="mSel" aria-label="Month"></select></div>
+    <div class="tog" role="group"><button id="bAr" aria-pressed="true">عربي</button><button id="bEn" aria-pressed="false">EN</button></div>
+    <button id="themeBtn" class="iconbtn" aria-label="theme"><span id="themeIcon">🌙</span></button>
+  </div>
+</div></header>
+
+<!-- KPI ribbon -->
+<div class="ribbon" id="ribbon">
+  <div class="wrap">
+    <div class="rring"><svg viewBox="0 0 76 76" width="66" height="66"><circle class="bg" cx="38" cy="38" r="32"/><circle class="fg" id="ribRing" cx="38" cy="38" r="32"/></svg><b id="ribPct">—</b></div>
+    <div class="rlede" id="ribLede">—</div>
+    <div class="rkpis" id="ribKpis"></div>
+  </div>
+  <div class="wrap" style="padding-top:0;padding-bottom:14px"><div class="ticker"><div class="lead"><span class="d"></span><span id="tkLead">Live</span></div><div class="feed"><div class="run" id="tkRun"></div></div></div></div>
+</div>
+
+<main class="wrap" id="mainView">
+  <!-- PRIZE BOARD (top) -->
+  <section style="border-top:0">
+    <div class="sh"><span class="ey" id="pbEy">If the month ended at today’s pace</span>
+      <h2 id="pbH">Projected prize board</h2>
+      <p id="pbP">Stores projected at 100%+ are ranked by achievement, and each takes the highest category its sales threshold allows. One store, one prize, won by its top seller.</p>
+    </div>
+    <div id="prizes"></div>
+  </section>
+
+  <!-- FIND YOUR BRANCH -->
+  <section>
+    <div class="sh"><span class="ey" id="fdEy">Your branch</span>
+      <h2 id="fdH">Find your branch</h2>
+      <p id="fdP">Type your branch, city, area manager or top seller to see where you stand and what’s left to win.</p>
+    </div>
+    <div class="finder">
+      <div class="fbar"><input id="fq" autocomplete="off" placeholder="e.g. Al Azizia · Riyadh · Fall Square"><div class="fsugg" id="fsugg" hidden></div></div>
+      <div id="finderResult"><p class="fprompt" id="fPrompt">Start typing to find your branch…</p></div>
+    </div>
+  </section>
+
+  <!-- FEATURED: CAR RACE -->
+  <section>
+    <div class="sh"><span class="ey" id="carEy">Category A · one car</span><h2 id="carH">The car race</h2><p id="carP">Every branch that can win the car, racing to 100% of target. The dashed line is the finish.</p></div>
+    <div id="carFeat"></div>
+  </section>
+
+  <!-- FEATURED: MOVERS -->
+  <section>
+    <div class="sh"><span class="ey" id="mvEy">Momentum</span><h2 id="mvH">Movers</h2><p id="mvP">Who is climbing fastest this week, and who is accelerating over the last three days.</p></div>
+    <div class="mv2">
+      <div class="mvcard"><div class="h"><span class="ic">▲</span><span id="mvRiseH2">Biggest risers</span></div><div id="moversRise"></div></div>
+      <div class="mvcard"><div class="h"><span class="ic">⚡</span><span id="mvFastH2">Fastest growing</span></div><div id="moversFast"></div></div>
+    </div>
+  </section>
+
+  <!-- FEATURED: MAP -->
+  <section>
+    <div class="sh"><span class="ey" id="mapEy">Geography</span><h2 id="mapH">Across the Kingdom</h2><p id="mapP">Every city sized by its branches and glowing by achievement — spot strong and soft regions at a glance.</p></div>
+    <div class="mapwrap">
+      <div class="mapcard"><div id="mapSvg"></div><div class="mlegend"><span><i style="background:var(--gold)"></i><span id="mlg1">≥100%</span></span><span><i style="background:var(--brand)"></i><span id="mlg2">80–100%</span></span><span><i style="background:#2b4f49"></i><span id="mlg3">under 80%</span></span></div></div>
+      <div class="card"><div id="mapList"></div></div>
+    </div>
+  </section>
+
+  <!-- EXPLORER TABS -->
+  <section>
+    <nav class="tabs" id="tabs">
+      <button class="tab on" data-v="branches" id="tbBranches">Branches</button>
+      <button class="tab" data-v="people" id="tbPeople">People</button>
+      <button class="tab" data-v="areas" id="tbAreas">Areas</button>
+      <button class="tab" data-v="rules" id="tbRules">How to win</button>
+    </nav>
+
+    <div class="view on" id="v-branches">
+      <div class="controls">
+        <div class="chips" id="chips">
+          <button class="chip-f on" data-f="all" id="cfAll">All</button>
+          <button class="chip-f" data-f="zone" id="cfZone">In prize zone</button>
+          <button class="chip-f" data-f="near" id="cfNear">One step away</button>
+          <button class="chip-f" data-f="car" id="cfCar">Car race</button>
+        </div>
+        <select class="sel" id="amSel"></select>
+        <div class="sbox"><input id="q" placeholder="Search…"></div>
+        <span class="summary" id="summary"></span>
+      </div>
+      <div class="lead">
+        <div class="lhead">
+          <span>#</span><span><button data-sort="name" id="thName">Branch</button></span>
+          <span><button data-sort="ach" class="s" id="thAch">Achievement</button></span>
+          <span class="h3d"><button data-sort="ach3" id="th3d">3-day</button></span>
+          <span class="hpz" id="thPrize">Prize</span><span></span>
+        </div>
+        <div id="rows"></div>
+      </div>
+    </div>
+
+    <div class="view" id="v-people">
+      <div class="seg" id="peopleSeg">
+        <button class="on" data-p="ach" id="psAch">Top branches</button>
+        <button data-p="lyG" id="psGrow">Fastest growing</button>
+        <button data-p="ach3" id="psPace">Best 3-day</button>
+      </div>
+      <div class="card"><div id="peopleList"></div></div>
+    </div>
+
+    <div class="view" id="v-areas"><div class="card"><div id="areaList"></div></div></div>
+
+    <div class="view" id="v-rules">
+      <div class="rules" id="rulesGrid"></div>
+    </div>
+  </section>
+</main>
+
+<!-- WINNERS -->
+<section id="winnersView">
+  <div class="curtain" id="curtain" hidden>
+    <div class="cpanel cleft"></div><div class="cpanel cright"></div>
+    <div class="cstage">
+      <div class="cornk" aria-hidden="true">✦ ✦ ✦</div>
+      <img class="clogo" src="media/match-logo.png" alt="MATCH">
+      <div class="cey" id="cEy">—</div>
+      <div class="ctitle" id="cTitle">—</div>
+      <div class="ccount" id="cCount">3</div>
+      <button class="creveal" id="cReveal" type="button">—</button>
+    </div>
+  </div>
+  <div class="win-deco" aria-hidden="true"><span style="left:4%;animation-duration:19s">🎈</span><span style="left:13%;animation-duration:25s;animation-delay:-8s">✨</span><span style="left:25%;animation-duration:22s;animation-delay:-14s">🎉</span><span style="left:74%;animation-duration:21s;animation-delay:-4s">🎈</span><span style="left:86%;animation-duration:26s;animation-delay:-17s">⭐</span><span style="left:95%;animation-duration:18s;animation-delay:-10s">🎊</span></div>
+  <div class="wrap win-wrap">
+    <header class="win-head">
+      <img class="win-logo" src="media/match-logo.png" alt="MATCH">
+      <div><h2 class="win-title" id="wTitle">الفائزون</h2><div class="win-subt" id="winnersSub">—</div></div>
+      <div class="win-pills"><span class="win-pill" id="wEy">النتائج النهائية</span><span class="win-pill"><span id="winnersWinLbl">الفروع الفائزة</span> <b id="winnersCount">—</b></span></div>
+    </header>
+    <section class="win-hero" id="winnersHero"></section>
+    <section class="ceo" id="ceoCard" hidden>
+      <div class="ceo-mic" aria-hidden="true">🎙️</div>
+      <div class="ceo-txt"><b id="ceoTitle">CEO message</b><div class="ceo-hint" id="ceoHint">A word for the winners</div></div>
+      <audio id="ceoAudio" preload="auto" controls src="media/ceo-voice.wav"></audio>
+    </section>
+    <div class="win-cats" id="winnersCats"></div>
+    <section class="win-thanks"><h3 id="winnersThanksH">🎉</h3><p class="muted" id="winnersThanksP" style="color:var(--muted)"></p></section>
+  </div>
+</section>
+<div class="previewbar" id="previewBar" role="status" hidden></div>
+
+<script id="embed" type="application/json">{}</script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+<script>
+const EMBED=JSON.parse(document.getElementById('embed').textContent);
+const QP=new URLSearchParams(location.search), PREVIEW=QP.has('preview'), QPMONTH=QP.get('m');
+let MONTH=(QPMONTH&&EMBED.months&&EMBED.months[QPMONTH])?QPMONTH:(EMBED.default||Object.keys(EMBED.months||{})[0]);
+let LANG='ar', D, RACE=[], AREAS=[];
+const PRM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pct=x=>Math.round((x||0)*100)+'%', pf=(x,d=1)=>((x||0)*100).toFixed(d)+'%', sgn=(x,d=0)=>((x||0)>=0?'+':'')+pf(x,d);
+const L2=(a,e)=>LANG==='ar'?a:e;
+const LOC=()=>LANG==='ar'?'ar-SA-u-ca-gregory-nu-latn':'en-GB';
+const monthName=k=>{const[y,m]=k.split('-').map(Number);return new Date(y,m-1,1).toLocaleDateString(LOC(),{month:'long',year:'numeric'});};
+const TIERNAME=k=>({A:L2('سيارة','Car'),B:L2('جوال ذكي','Smartphone'),C:L2('آيباد','iPad'),D:L2('ساعة ذكية','Smartwatch'),E:L2('سبيكة ذهب','Gold bar')}[k]);
+const ICO={A:'🚗',B:'📱',C:'💻',D:'⌚',E:'🥇'};
+const TC={A:'--t-car',B:'--t-phone',C:'--t-ipad',D:'--t-watch',E:'--t-gold'};
+const empName=s=>{const e=s.team&&s.team[0];return e?esc(e[0]):'';};
+const carSVG=c=>`<svg width="30" height="22" viewBox="0 0 30 22" aria-hidden="true"><path d="M3 14 L5 8 Q6 6 9 6 L18 6 Q21 6 23 9 L26 11 Q28 12 28 14 L28 16 L3 16 Z" fill="${c}"/><rect x="9" y="8" width="5" height="3.5" rx="1" fill="var(--surface)"/><rect x="15.5" y="8" width="4.5" height="3.5" rx="1" fill="var(--surface)"/><circle cx="9" cy="16.5" r="3" fill="var(--ink)"/><circle cx="22" cy="16.5" r="3" fill="var(--ink)"/></svg>`;
+const zoneOf=s=>s.ach>=1?'zone':(s.ach>=.85?'near':'');
+
+function bindMonth(k){MONTH=k;D=EMBED.months[k];RACE=D.stores||[];AREAS=D.areas||[];
+  RACE.forEach(s=>{s._zone=s.ach>=1;s._near=s.ach>=.85&&s.ach<1;s._car=!!s.carField;});}
+
+/* ---------- i18n for static labels ---------- */
+function applyLang(){
+  document.documentElement.lang=LANG; document.documentElement.dir=LANG==='ar'?'rtl':'ltr';
+  $('bAr').setAttribute('aria-pressed',LANG==='ar'); $('bEn').setAttribute('aria-pressed',LANG==='en');
+  $('brandSub').textContent=L2('سباق MATCH · ','MATCH race · ')+monthName(MONTH);
+  const set=(id,a,e)=>{const el=$(id);if(el)el.textContent=L2(a,e);};
+  set('themeIcon','🌙','🌙');
+  document.querySelector('[data-t="dataTo"]').textContent=L2('البيانات حتى','Data through');
+  document.querySelector('[data-t="announce"]').textContent=L2('إعلان النتائج','Results');
+  document.querySelector('[data-t="updated"]').textContent=L2('آخر تحديث','Updated');
+  document.querySelector('[data-t="monthLbl"]').textContent=L2('الشهر','Month');
+  document.querySelector('[data-t="brand"]').textContent=L2('مسابقة أثر','Athar Competition');
+  set('pbEy','التقدّم نحو مستهدف الشهر','Progress toward the month target');
+  set('pbH','لوحة الجوائز','Prize board');
+  set('pbP','نسبة كل فرع = مبيعاته حتى الآن ÷ مستهدف الشهر الكامل. عند بلوغ 100% يدخل مراكز الفوز ويأخذ أعلى فئة يسمح بها حد مبيعاته. فرع واحد = جائزة واحدة.','Each branch = sales so far ÷ its full-month Total Target. At 100% it enters the winning seats, taking the highest category its sales threshold allows. One store, one prize.');
+  set('tbBranches','الفروع','Branches'); set('tbPeople','الموظفون','People'); set('tbAreas','المناطق','Areas'); set('tbCar','سباق السيارة','Car race'); set('tbRules','كيف تفوز؟','How to win');
+  set('cfAll','الكل','All'); set('cfZone','داخل الجوائز','In prize zone'); set('cfNear','على بُعد خطوة','One step away'); set('cfCar','سباق السيارة','Car race');
+  set('psAch','أعلى الفروع','Top branches'); set('psGrow','الأسرع نمواً','Fastest growing'); set('psPace','أفضل 3 أيام','Best 3-day');
+  $('q').placeholder=L2('ابحث عن فرع أو مدير…','Search branch or manager…');
+  set('thName','الفرع','Branch'); set('thPrize','الجائزة','Prize');
+  set('wTitle','الفائزون','Winners'); set('wEy','النتائج النهائية','Final results');
+  set('fdEy','فرعك','Your branch'); set('fdH','ابحث عن فرعك','Find your branch');
+  set('fdP','اكتب اسم فرعك أو مدينتك أو مديرك أو الأعلى مبيعاً لمعرفة موقعك وما تبقّى للفوز.','Type your branch, city, area manager or top seller to see where you stand and what’s left to win.');
+  $('fq').placeholder=L2('مثال: العزيزية · الرياض · Fall Square','e.g. Al Azizia · Riyadh · Fall Square');
+  set('carEy','الفئة A · سيارة واحدة','Category A · one car'); set('carH','سباق السيارة','The car race');
+  set('carP','كل فرع يمكنه الفوز بالسيارة في سباق نحو 100% من المستهدف. الخط المتقطّع هو خط النهاية.','Every branch that can win the car, racing to 100% of target. The dashed line is the finish.');
+  set('mvEy','الزخم','Momentum'); set('mvH','الأكثر حركة','Movers');
+  set('mvP','من يصعد الأسرع هذا الأسبوع، ومن يتسارع خلال آخر 3 أيام.','Who is climbing fastest this week, and who is accelerating over the last three days.');
+  set('mvRiseH2','الأكثر صعوداً','Biggest risers'); set('mvFastH2','الأسرع نمواً','Fastest growing');
+  set('mapEy','الجغرافيا','Geography'); set('mapH','على مستوى المملكة','Across the Kingdom');
+  set('mapP','كل مدينة بحجم فروعها وتتوهّج حسب التحقيق — تعرّف على المناطق القوية والأضعف بلمحة.','Every city sized by its branches and glowing by achievement — spot strong and soft regions at a glance.');
+  set('mlg1','≥100%','≥100%'); set('mlg2','80–100%','80–100%'); set('mlg3','أقل من 80%','under 80%');
+}
+
+/* ---------- header meta ---------- */
+function fmtUpd(){if(!D.built)return '—';const dt=new Date(D.built);try{return dt.toLocaleString(LOC(),{timeZone:D.tz||'Asia/Riyadh',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});}catch(e){return '—';}}
+function header(){
+  const[y,m,d]=D.asOf.split('-').map(Number);
+  $('hAsOf').textContent=new Date(y,m-1,d).toLocaleDateString(LOC(),{day:'numeric',month:'short'});
+  $('hAnn').textContent=EMBED.winnersFrom?new Date(EMBED.winnersFrom+'T00:00:00').toLocaleDateString(LOC(),{day:'numeric',month:'short'}):'—';
+  $('hUpd').textContent=fmtUpd();
+}
+function fillMonths(){const s=$('mSel');s.innerHTML=Object.keys(EMBED.months).map(k=>`<option value="${k}"${k===MONTH?' selected':''}>${monthName(k)}</option>`).join('');}
+
+/* ---------- ribbon ---------- */
+function ribbon(){
+  const p=D.pulse||{}, lead=RACE.filter(s=>s._car).sort((a,b)=>b.ach-a.ach)[0];
+  const off=201*(1-Math.min(1,p.ach||0));
+  if(PRM){$('ribRing').style.strokeDashoffset=off;}else{$('ribRing').style.strokeDashoffset=201;requestAnimationFrame(()=>$('ribRing').style.strokeDashoffset=off);}
+  $('ribPct').textContent=pf(p.ach,0);
+  $('ribLede').innerHTML=L2(
+    `شركة MATCH عند <span class="hi">${pf(p.ach)}</span> من المستهدف، و<b>${p.inz||0}</b> فرعاً في طريقها للجوائز.`+(lead?` <span class="hi2">${esc(lead.name)}</span> يتصدّر سباق السيارة.`:''),
+    `MATCH is at <span class="hi">${pf(p.ach)}</span> of target, with <b>${p.inz||0}</b> branches on course for a prize.`+(lead?` <span class="hi2">${esc(lead.name)}</span> leads the car race.`:''));
+  $('ribKpis').innerHTML=
+    `<div class="rk"><div class="k">${L2('داخل الجوائز','In prize zone')}</div><div class="v good">${p.inz||0}</div></div>`+
+    `<div class="rk"><div class="k">${L2('على بُعد خطوة','One step away')}</div><div class="v warn">${p.near||0}</div></div>`+
+    `<div class="rk"><div class="k">${L2('مقابل العام الماضي','vs last year')}</div><div class="v ${(p.ly||0)>=0?'good':''}">${sgn(p.ly,0)}</div></div>`+
+    `<div class="rk"><div class="k">${L2('الأيام المتبقية','Days left')}</div><div class="v">${D.left}</div></div>`;
+}
+
+/* ---------- prize board ---------- */
+function pzTierHTML(k){
+  const winners=RACE.filter(s=>s.prize===k).sort((a,b)=>b.ach-a.ach), won=winners.length>0;
+  let lead=null,p=0,gap=0,near=false;
+  if(won){lead=winners[0];p=Math.min(100,Math.round(lead.ach*100));}
+  else{const el=RACE.filter(s=>s.ceiling===k&&s.prize!==k).sort((a,b)=>b.ach-a.ach);lead=el[0]||null;if(lead){p=Math.min(99,Math.round(lead.ach*100));gap=Math.max(0,100-p);near=p>=90;}}
+  const frac=Math.min(p,100)/100, off=327*(1-frac), ang=frac*360, feat=k==='A';
+  const seats=won?`${winners.length}/${k==='A'?1:10}`:(k==='A'?L2('مقعد واحد','1 seat'):L2('10 مقاعد','10 seats'));
+  const body=won?`<div class="pz-won">✓ ${L2('في مراكز الفوز','In winning seats')}</div>`
+    :lead?`<div class="pz-motiv"><span class="pz-dot"></span>${L2('باقي','')} <span class="pz-gap">${gap}%</span> ${L2('للتأهل','to qualify')}</div>`:'';
+  const leadLine=lead?`<div class="pz-lead"><span class="lnk">${esc(lead.name)}</span><small>${esc(lead.city)}${empName(lead)?' · 🏅 '+empName(lead):''}</small></div>`:`<div class="pz-lead" style="color:var(--muted);font-weight:400">${L2('لا يوجد منافس بعد','No contender yet')}</div>`;
+  const list=won&&winners.length>1?`<div class="pz-list">${winners.slice(0,6).map(s=>`<span class="pz-chip" data-open="${esc(s.code)}">${esc(s.name)} · ${pf(s.ach)}</span>`).join('')}${winners.length>6?`<span class="pz-chip">+${winners.length-6}</span>`:''}</div>`:'';
+  return `<div class="pz-card ${feat?'feat':''} ${won?'won':''} ${near?'near':''}" ${lead?`data-open="${lead.code}"`:''} style="--tc:var(${TC[k]})">
+    <div class="pz-spin"></div><div class="pz-halo"></div>
+    <div class="pz-body">
+      <div class="pz-top"><span class="pz-tier">${k}</span><h3>${TIERNAME(k)}</h3><span class="pz-seats">${seats}</span></div>
+      <div class="pz-center">
+        <div class="pz-ringbox">
+          <svg class="pz-ring" viewBox="0 0 138 138" aria-hidden="true"><circle class="pz-bg" cx="69" cy="69" r="52"/><circle class="pz-fg" cx="69" cy="69" r="52" data-off="${off}"/></svg>
+          <svg class="pz-tipwrap" viewBox="0 0 138 138" aria-hidden="true"><g class="pz-tip" data-ang="${ang}"><circle cx="69" cy="17" r="5"/></g></svg>
+          <div class="pz-ico">${ICO[k]}</div>
+        </div>
+        <div class="pz-txt"><b>${p}%</b><small>${L2('من المستهدف','of target')}</small>${body}${leadLine}</div>
+      </div>${list}
+    </div></div>`;
+}
+function renderPrizes(){
+  $('prizes').innerHTML=['A','B','C','D','E'].map(pzTierHTML).join('');
+  [...document.querySelectorAll('.pz-card')].forEach((c,i)=>{
+    const fg=c.querySelector('.pz-fg'),tip=c.querySelector('.pz-tip'),off=+fg.dataset.off,ang=+tip.dataset.ang;
+    setTimeout(()=>{c.classList.add('in');
+      if(!PRM){fg.style.strokeDashoffset='327';tip.style.transform='rotate(0deg)';requestAnimationFrame(()=>{fg.style.strokeDashoffset=off;tip.style.transform=`rotate(${ang}deg)`;});}
+      else{fg.style.strokeDashoffset=off;tip.style.transform=`rotate(${ang}deg)`;}
+    },PRM?0:120+i*110);
+  });
+}
+
+/* ---------- branches explorer ---------- */
+let F={f:'all',am:'',q:'',sort:'ach',dir:-1}, openRow=null;
+function fillAM(){const ams=[...new Set(RACE.map(s=>s.am).filter(Boolean))].sort();
+  $('amSel').innerHTML=`<option value="">${L2('كل المناطق','All area managers')}</option>`+ams.map(a=>`<option>${esc(a)}</option>`).join('');}
+function filtered(){return RACE.filter(s=>{
+  if(F.f==='zone'&&!s._zone)return false; if(F.f==='near'&&!s._near)return false; if(F.f==='car'&&!s._car)return false;
+  if(F.am&&s.am!==F.am)return false;
+  if(F.q){const q=F.q.toLowerCase();if(!((s.name||'')+(s.city||'')+(s.am||'')+empName(s)).toLowerCase().includes(q))return false;}
+  return true;}).sort((a,b)=>{const k=F.sort;const av=a[k],bv=b[k];
+    if(k==='name')return (''+av).localeCompare(''+bv)*(-F.dir);
+    return ((av>bv)?1:(av<bv)?-1:0)*F.dir;});}
+function rowHTML(s,i){
+  const z=zoneOf(s), st=z==='zone'?`<span class="stat-z zone">${L2('داخل','in zone')}</span>`:z==='near'?`<span class="stat-z near">+${Math.round((1-s.ach)*100)}%</span>`:'';
+  const prize=s.prize?`<span class="tierchip c${s.prize}">${TIERNAME(s.prize)}</span>`:(st||'—');
+  const bars=[['M',s.ach],['3d',s.ach3],['1d',s.dayAch]].map(([lb,v])=>`<div class="sb"><i style="height:${Math.max(6,Math.min(100,(v||0)*100))}%"></i><small>${lb}</small></div>`).join('');
+  return `<div class="lrow" data-n="${esc(s.code)}">
+    <div class="lmain" data-row="${esc(s.code)}">
+      <span class="pos ${i===0?'p1':''}">${i+1}</span>
+      <div class="bname"><b>${esc(s.name)}</b><small>${esc(s.city)} · ${esc(s.am||'—')}</small></div>
+      <div class="cell-ach"><div class="abar"><i style="width:${Math.min(100,(s.ach||0)*100)}%"></i></div><div class="apct">${pf(s.ach)}</div></div>
+      <div class="cell-3d num">${pct(s.ach3)}</div>
+      <div class="cell-pz">${prize}</div>
+      <div class="caret">▾</div>
+    </div>
+    <div class="detail"><div class="dinner">
+      <div class="dblock"><div class="dt">${L2('الوتيرة','Pace')}</div><div class="sparkbars">${bars}</div></div>
+      <div class="dblock"><div class="dt">${L2('الموقف','Standing')}</div>
+        <div class="drow"><span>${L2('التحقيق','Achievement')}</span><b class="num">${pf(s.ach)}</b></div>
+        <div class="drow"><span>${L2('آخر 3 أيام','3-day')}</span><b class="num">${pct(s.ach3)}</b></div>
+        <div class="drow"><span>${L2('مقابل العام الماضي','vs last year')}</span><b class="num" style="color:${(s.lyG||0)>=0?'var(--good)':'var(--bad)'}">${s.lyG!=null?sgn(s.lyG,0):'—'}</b></div>
+        <div class="drow"><span>${L2('سقف الفئة','Prize ceiling')}</span><b>${s.ceiling?TIERNAME(s.ceiling):'—'}</b></div></div>
+      <div class="dblock"><div class="dt">${L2('الأعلى مبيعاً','Top seller')}</div>
+        <div style="padding:6px 0">${empName(s)?`<span class="av">${empName(s)[0]}</span>${empName(s)}`:'—'}</div>
+        <div class="drow"><span>${L2('الجائزة المتوقعة','Projected prize')}</span><b>${s.prize?TIERNAME(s.prize):'—'}</b></div></div>
+    </div></div></div>`;
+}
+function renderRows(){
+  const arr=filtered();
+  const avg=arr.length?Math.round(arr.reduce((t,s)=>t+(s.ach||0),0)/arr.length*100):0;
+  $('summary').innerHTML=L2(`عرض <b>${arr.length}</b> من ${RACE.length} · المتوسط <b>${avg}%</b>`,`Showing <b>${arr.length}</b> of ${RACE.length} · avg <b>${avg}%</b>`);
+  const old={};document.querySelectorAll('.lrow').forEach(r=>old[r.dataset.n]=r.getBoundingClientRect().top);
+  $('rows').innerHTML=arr.length?arr.map(rowHTML).join(''):`<div class="empty">${L2('لا نتائج','No branches match.')}</div>`;
+  if(openRow){const r=document.querySelector(`.lrow[data-n="${CSS.escape(openRow)}"]`);if(r)r.classList.add('open');}
+  if(!PRM)document.querySelectorAll('.lrow').forEach(r=>{const o=old[r.dataset.n];if(o==null)return;const dd=o-r.getBoundingClientRect().top;
+    if(dd){r.style.transition='none';r.style.transform=`translateY(${dd}px)`;requestAnimationFrame(()=>{r.style.transition='transform .4s cubic-bezier(.2,.7,.3,1)';r.style.transform='';});}});
+}
+
+/* ---------- people / areas / car ---------- */
+function renderPeople(k){
+  const arr=RACE.filter(s=>empName(s)).slice().sort((a,b)=>(b[k]||0)-(a[k]||0)).slice(0,10);
+  const val=s=>k==='lyG'?sgn(s.lyG,0):pf(s[k]);
+  $('peopleList').innerHTML=arr.map((s,i)=>`<div class="mini"><span class="rk2 ${i===0?'r1':''}">${i+1}</span>
+    <div><b>${empName(s)}</b><small>${esc(s.name)} · ${esc(s.city)}</small></div>
+    <div class="r ${k==='lyG'?((s.lyG||0)>=0?'good':'bad'):''}">${val(s)}</div></div>`).join('')||`<div class="empty">—</div>`;
+}
+function renderAreas(){
+  const rows=(AREAS.length?AREAS:[]).slice().sort((a,b)=>(b.ach||0)-(a.ach||0));
+  $('areaList').innerHTML=rows.map((r,i)=>`<div class="mini"><span class="rk2 ${i===0?'r1':''}">${i+1}</span>
+    <div><b>${esc(r.am)}</b><small>${L2(`${r.n} فرع`,`${r.n} branches`)}</small></div>
+    <div class="r">${pf(r.ach)}</div></div>`).join('')||`<div class="empty">—</div>`;
+}
+function renderCar(){
+  const el=$('carFeat');if(!el)return;
+  const arr=RACE.filter(s=>s._car).sort((a,b)=>b.ach-a.ach).slice(0,10);
+  const lo=.55,hi=1.2,pos=v=>Math.max(3,Math.min(97,(v-lo)/(hi-lo)*100));
+  el.innerHTML=`<div class="crace">`+arr.map((s,i)=>`<div class="crow">
+    <span class="rk2 ${i===0?'r1':''}">${i+1}</span>
+    <div class="nm"><b>${esc(s.name)}</b><small>${esc(s.city)} · ${esc(s.am||'')}</small></div>
+    <div class="clane"><div class="fill" style="width:${pos(s.ach)}%"></div><div class="finish" style="inset-inline-start:${pos(1)}%"></div><div class="carmk" style="inset-inline-start:${pos(s.ach)}%">${carSVG(i===0?'var(--gold)':'var(--brand)')}</div></div>
+    <div class="cp">${pf(s.ach)}<small>${s.ach>=1?L2('تجاوز الحد','clears'):L2('باقي '+Math.round((1-s.ach)*100)+'%','+'+Math.round((1-s.ach)*100)+'% to go')}</small></div></div>`).join('')+`</div>`;
+}
+function renderRules(){
+  const R=[[L2('حقّق 100% من المستهدف','Hit 100% of target'),L2('لا يدخل أي فرع لوحة الجوائز قبل بلوغه المستهدف الكامل.','Only branches at or above their full-month target enter the board.')],
+    [L2('تجاوز حد المبيعات','Clear the sales threshold'),L2('لكل فئة حد مبيعات شهري، ويأخذ الفرع أعلى فئة يتجاوز حدها.','Each prize category needs a minimum monthly sales level — you take the highest you clear.')],
+    [L2('فرع واحد، جائزة واحدة','One store, one prize'),L2('الفرع الفائز يُستبعد من بقية الفئات، والموظف الأعلى مبيعاً يأخذ الجائزة.','A winning branch leaves the other categories; its top seller takes the reward.')]];
+  $('rulesGrid').innerHTML=R.map(([h,p],i)=>`<div class="rule"><div class="ic">${i+1}</div><h3>${h}</h3><p>${p}</p></div>`).join('');
+}
+
+/* ---------- ticker ---------- */
+function renderTicker(){
+  const items=[];
+  [...RACE].sort((a,b)=>(b.dayAch||0)-(a.dayAch||0)).slice(0,5).forEach(s=>items.push({tg:L2('قفزة','JUMP'),n:s.name,pts:'+'+Math.round((s.dayAch||0)*100)+'%'}));
+  [...RACE].filter(s=>s._zone).sort((a,b)=>(b.ach||0)-(a.ach||0)).slice(0,4).forEach(s=>items.push({tg:L2('متأهل','IN ZONE'),n:s.name,pts:pf(s.ach,0)}));
+  [...RACE].filter(s=>s.lyG!=null).sort((a,b)=>(b.lyG||0)-(a.lyG||0)).slice(0,4).forEach(s=>items.push({tg:L2('نمو','GROWTH'),n:s.name,pts:sgn(s.lyG,0)}));
+  const one=items.map(it=>`<span class="ti"><span class="tg">${it.tg}</span><b>${esc(it.n)}</b><span class="pts">${it.pts}</span></span>`).join('');
+  $('tkRun').innerHTML=one+one; $('tkLead').textContent=L2('مباشر','Live');
+}
+/* ---------- finder (my branch) ---------- */
+function fMatches(q){q=q.trim().toLowerCase();if(!q)return[];
+  return RACE.filter(s=>((s.name||'')+' '+(s.city||'')+' '+(s.am||'')+' '+(s.code||'')+' '+empName(s)).toLowerCase().includes(q)).sort((a,b)=>b.ach-a.ach).slice(0,7);}
+function renderSugg(q){const el=$('fsugg'),m=fMatches(q);
+  if(!m.length){el.hidden=true;el.innerHTML='';return;}
+  el.innerHTML=m.map(s=>`<button data-code="${esc(s.code)}"><div><b>${esc(s.name)}</b><br><small>${esc(s.city)} · ${esc(s.am||'')}</small></div><span style="margin-inline-start:auto" class="num">${pf(s.ach)}</span></button>`).join('');
+  el.hidden=false;}
+function finderCard(s){
+  const off=433*(1-Math.min(1,s.ach||0));
+  const hint=s.ach>=1?L2(`في مراكز الفوز — الجائزة المتوقعة: <b>${s.prize?TIERNAME(s.prize):TIERNAME(s.ceiling)}</b>`,`In winning seats — projected prize: <b>${s.prize?TIERNAME(s.prize):TIERNAME(s.ceiling)}</b>`)
+    :L2(`باقي <b>${Math.round((1-s.ach)*100)}%</b> للوصول إلى 100% والتأهل لـ<b>${TIERNAME(s.ceiling)}</b>`,`<b>${Math.round((1-s.ach)*100)}%</b> to reach 100% and qualify for <b>${TIERNAME(s.ceiling)}</b>`);
+  const team=(s.team||[]).filter(m=>m&&m[0]).slice().sort((a,b)=>(b[3]||0)-(a[3]||0));
+  let staffHTML='';
+  if(team.length){
+    const ach=s.ach||0;                                   // branch achievement = % of the month target (the ring)
+    const all=team.reduce((t,m)=>t+(m[3]||0),0);          // total share of branch sales rung on named staff
+    const denom=Math.max(1,all);                          // normalise so the slices never exceed the branch
+    const shown=team.slice(0,8);
+    const shownNorm=shown.reduce((t,m)=>t+(m[3]||0)/denom,0);
+    const otherNorm=Math.max(0,1-shownNorm);              // store-account + any staff beyond the top 8
+    const pf0=x=>(x*100).toFixed(x>0&&x<0.1?1:0)+'%';     // each value = share × achievement = % of the month target
+    const line=(name,share,cls)=>`<div class="trow2${cls?' '+cls:''}"><span class="nmc">${name}</span><div class="tbar"><i style="width:${Math.min(100,share*100).toFixed(1)}%"></i></div><span class="tp">${pf0(share*ach)}</span></div>`;
+    const rows=shown.map((m,i)=>line(`<span class="mdl">${i+1}</span>${esc(m[0])}${m[1]?' <span class="eno">· '+esc(m[1])+'</span>':''}`,(m[3]||0)/denom)).join('');
+    const otherRow=otherNorm>0.005?line(`<span class="mdl">·</span>${L2('حساب الفرع / آخرون','Store account / others')}`,otherNorm,'dim'):'';
+    const totalRow=line(`${L2('الإجمالي — % من المستهدف الشهري','Total — % of monthly target')}`,1,'ttot');
+    staffHTML=`<div class="fteam"><div class="dt"><span>${L2('مساهمة الفريق في المستهدف الشهري','Team contribution to monthly target')}</span><span>${L2('٪ من المستهدف','% of target')}</span></div>${rows}${otherRow}${totalRow}</div>`;
+  }
+  $('finderResult').innerHTML=`<div class="fcard">
+    <div class="fring"><svg viewBox="0 0 160 160" width="160" height="160"><circle class="bg" cx="80" cy="80" r="69"/><circle class="fg" cx="80" cy="80" r="69" id="fringFg"/></svg><div class="c"><b>${pf(s.ach)}</b><small>${L2('من المستهدف','of target')}</small></div></div>
+    <div class="fmain"><h3>${esc(s.name)}</h3><div class="loc">${esc(s.city)} · ${esc(s.am||'—')}${empName(s)?' · 🏅 '+empName(s):''}</div>
+      <div class="fstats">
+        <div class="s"><div class="k">${L2('الترتيب','Rank')}</div><div class="v">${s.rank?('#'+s.rank):'—'}</div></div>
+        <div class="s"><div class="k">${L2('آخر 3 أيام','3-day')}</div><div class="v">${pct(s.ach3)}</div></div>
+        <div class="s"><div class="k">${L2('مقابل العام الماضي','vs last yr')}</div><div class="v" style="color:${(s.lyG||0)>=0?'var(--good)':'var(--bad)'}">${s.lyG!=null?sgn(s.lyG,0):'—'}</div></div>
+        <div class="s"><div class="k">${L2('سقف الفئة','Ceiling')}</div><div class="v">${s.ceiling||'—'}</div></div>
+      </div>
+      <div class="fhint">${hint}</div>
+    </div>${staffHTML}</div>`;
+  const fg=$('fringFg');if(fg){if(PRM)fg.style.strokeDashoffset=off;else{fg.style.strokeDashoffset='433';requestAnimationFrame(()=>fg.style.strokeDashoffset=off);}}
+  try{localStorage.setItem('athar-mine',s.code);}catch(e){}
+}
+function openInFinder(code){const s=RACE.find(x=>x.code===code);if(!s)return;
+  $('fq').value=s.name; $('fsugg').hidden=true; finderCard(s);
+  const h=$('fdH'); if(h)h.scrollIntoView({behavior:'smooth',block:'start'});
+  setTimeout(()=>{try{$('fq').focus({preventScroll:true});}catch(e){}},450);}
+function renderFinderDefault(){let code=null;try{code=localStorage.getItem('athar-mine');}catch(e){}
+  const s=code&&RACE.find(x=>x.code===code);
+  if(s)finderCard(s);else $('finderResult').innerHTML=`<p class="fprompt">${L2('ابدأ الكتابة للعثور على فرعك…','Start typing to find your branch…')}</p>`;}
+/* ---------- movers / map ---------- */
+function mvList(el,arr,fmt,isUp){if(!el)return;el.innerHTML=arr.map((s,i)=>`<div class="mvrow">
+  <span class="rk2 ${i===0?'r1':''}">${i+1}</span>
+  <div><b>${esc(s.name)}</b><small>${esc(s.city)}</small></div>
+  <span class="mvbadge ${isUp(s)?'up':'dn'}">${isUp(s)?'▲':'▼'} ${fmt(s)}</span></div>`).join('')||`<div class="empty">—</div>`;}
+function renderMovers(){
+  mvList($('moversRise'),[...RACE].filter(s=>s.lyG!=null).sort((a,b)=>(b.lyG||0)-(a.lyG||0)).slice(0,6),s=>sgn(s.lyG,0),s=>(s.lyG||0)>=0);
+  mvList($('moversFast'),[...RACE].sort((a,b)=>(b.ach3||0)-(a.ach3||0)).slice(0,6),s=>pct(s.ach3),()=>true);
+}
+/* real geography: [lat, lon] — projected onto the map so cities sit where they actually are */
+const GEO={Riyadh:[24.71,46.68],Jeddah:[21.49,39.19],Makkah:[21.39,39.86],Madinah:[24.47,39.61],Dammam:[26.43,50.10],Khobar:[26.28,50.21],Jubail:[27.01,49.66],Taif:[21.27,40.42],Jizan:[16.89,42.57],Arar:[30.98,41.02],Buraidah:[26.33,43.97],Onaizah:[26.09,43.99],Hail:[27.52,41.69],Tabuk:[28.38,36.57],Yanbu:[24.09,38.06],Abha:[18.22,42.51],Najran:[17.49,44.13],'Al Hasa':[25.38,49.59],Hofuf:[25.36,49.59],Sabya:[17.15,42.63]};
+/* simplified KSA border [lat, lon], clockwise from the northwest */
+const BORDER=[[31.5,38.6],[31.1,40.2],[29.1,44.8],[28.9,46.6],[28.5,48.4],[27.6,49.6],[25.8,50.1],[25.6,51.3],[24.6,51.6],[22.6,52.2],[20.0,55.3],[18.6,52.0],[17.6,47.2],[17.4,44.2],[16.4,42.9],[18.3,41.7],[20.6,39.9],[22.6,38.9],[25.2,37.0],[27.6,35.8],[29.1,34.8],[31.5,38.6]];
+const MLON0=34.5,MLON1=56,MLAT0=15.8,MLAT1=32,MPW=300,MPH=272,MPX=12,MPY=12;
+const MX=lo=>MPX+(lo-MLON0)/(MLON1-MLON0)*MPW, MY=la=>MPY+(MLAT1-la)/(MLAT1-MLAT0)*MPH;
+function renderMap(){
+  const agg={};RACE.forEach(s=>{if(!GEO[s.city])return;(agg[s.city]=agg[s.city]||{n:0,sum:0}).n++;agg[s.city].sum+=s.ach||0;});
+  const nodes=Object.entries(agg).map(([c,v])=>({c,n:v.n,ach:v.sum/v.n})).sort((a,b)=>b.ach-a.ach);
+  if(!nodes.length){$('mapSvg').innerHTML='';$('mapList').innerHTML='<div class="empty">—</div>';return;}
+  const col=a=>a>=1?'var(--gold)':a>=.85?'var(--brand)':'#3f6f68';
+  const rOf=n=>Math.max(5,Math.min(17,4.5+Math.sqrt(n)*3));
+  const land='M '+BORDER.map(([la,lo])=>MX(lo).toFixed(1)+' '+MY(la).toFixed(1)).join(' L ')+' Z';
+  let grat='';
+  for(let lo=38;lo<=54;lo+=8)grat+=`<line class="graticule" x1="${MX(lo).toFixed(1)}" y1="${MPY}" x2="${MX(lo).toFixed(1)}" y2="${MPY+MPH}"/>`;
+  for(let la=20;la<=30;la+=5)grat+=`<line class="graticule" x1="${MPX}" y1="${MY(la).toFixed(1)}" x2="${MPX+MPW}" y2="${MY(la).toFixed(1)}"/>`;
+  const labelFor=new Set([...nodes].sort((a,b)=>b.n-a.n).slice(0,6).map(n=>n.c));
+  const bubs=nodes.map(nd=>{const g=GEO[nd.c],x=MX(g[1]),y=MY(g[0]),r=rOf(nd.n),c=col(nd.ach);
+    return `<g class="bub" data-c="${esc(nd.c)}" data-n="${nd.n}" data-a="${Math.round(nd.ach*100)}">
+      <circle class="halo" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(r+7).toFixed(1)}" fill="${c}"/>
+      <circle class="dot" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}" fill="${c}"/>
+      ${labelFor.has(nd.c)?`<text class="blab" x="${(x+r+3).toFixed(1)}" y="${(y+2.5).toFixed(1)}">${esc(nd.c)}</text>`:''}</g>`;}).join('');
+  $('mapSvg').innerHTML=`<svg viewBox="0 0 ${MPW+2*MPX} ${MPH+2*MPY}" role="img"><path class="land" d="${land}"/>${grat}${bubs}</svg><div class="mtip" id="mtip"></div>`;
+  $('mapList').innerHTML=nodes.map((nd,i)=>`<div class="mini mcity" data-c="${esc(nd.c)}"><span class="rk2 ${i===0?'r1':''}">${i+1}</span>
+    <div><b>${esc(nd.c)}</b><small>${L2(nd.n+' فرع',nd.n+(nd.n===1?' branch':' branches'))}</small></div><div class="r" style="color:${col(nd.ach)}">${pf(nd.ach,0)}</div></div>`).join('');
+  const card=$('mapSvg').closest('.mapcard'), tip=$('mtip');
+  $('mapSvg').querySelectorAll('.bub').forEach(b=>{
+    const row=()=>$('mapList').querySelector(`.mcity[data-c="${CSS.escape(b.dataset.c)}"]`);
+    b.addEventListener('mousemove',e=>{const r=card.getBoundingClientRect();tip.style.left=(e.clientX-r.left)+'px';tip.style.top=(e.clientY-r.top)+'px';
+      tip.innerHTML=`<b>${esc(b.dataset.c)}</b> · ${b.dataset.a}% · ${b.dataset.n} ${L2('فرع',(b.dataset.n==1?'branch':'branches'))}`;tip.style.opacity='1';const rr=row();if(rr)rr.classList.add('hot');});
+    b.addEventListener('mouseleave',()=>{tip.style.opacity='0';const rr=row();if(rr)rr.classList.remove('hot');});
+  });
+}
+/* ---------- winners ---------- */
+function renderWinners(){
+  const by={A:[],B:[],C:[],D:[],E:[]};
+  RACE.forEach(s=>{if(s.prize&&by[s.prize])by[s.prize].push(s);});
+  Object.values(by).forEach(a=>a.sort((x,y)=>y.ach-x.ach));
+  $('winnersSub').textContent=L2('سباق MATCH · ','MATCH race · ')+monthName(MONTH);
+  $('winnersWinLbl').textContent=L2('الفروع الفائزة','Winning branches');
+  $('winnersCount').textContent=RACE.filter(s=>s.prize).length;
+  const car=by.A[0];
+  $('winnersHero').innerHTML=`<div class="win-confetti" id="winConfetti" aria-hidden="true"></div>`+
+    `<div class="win-banner" aria-hidden="true">🎉 ✨ 🎊</div>`+
+    `<div class="win-htag">🏆 ${L2('أبطال مسابقة أثر','Athar champions')} · ${monthName(MONTH)}</div>`+
+    `<div class="win-ico" aria-hidden="true">🚗</div>`+
+    (car?`<div class="win-n">${esc(car.name)}</div><div class="win-loc">${esc(car.city)} · ${esc(car.am||'')}</div><div class="win-pct">${pf(car.ach)}</div>`+(empName(car)?`<div class="win-team">⭐ ${empName(car)}</div>`:'')
+        :`<div class="win-n">${L2('لم تُمنح هذا الشهر','Not awarded this month')}</div><div class="win-loc">${L2('لم يحقق أي فرع شروط السيارة','No branch met the car conditions')}</div>`);
+  const pd=(b,place)=>b?`<div class="pd p${place}"><div class="who">${esc(b.name)}</div><div class="where">${esc(b.city)}</div>${empName(b)?`<div class="emp">⭐ ${empName(b)}</div>`:''}<div class="blk">${place}</div><div class="pdpct">${pf(b.ach)}</div></div>`:'<div></div>';
+  $('winnersCats').innerHTML=['B','C','D','E'].map(k=>{const L=by[k];
+    const chips=L.length>3?`<div class="win-chips">`+L.slice(3).map((b,i)=>`<span class="win-chip">${i+4}. <b>${esc(b.name)}</b>${empName(b)?' · '+empName(b):''} <span class="pdpct">${pf(b.ach)}</span></span>`).join('')+`</div>`:'';
+    return `<section class="win-sec"><h3>${ICO[k]} ${TIERNAME(k)} <small>${L2(L.length+' فائز',L.length+' winner'+(L.length!==1?'s':''))}</small></h3>`+
+      (L.length?`<div class="win-podium">${pd(L[1],2)}${pd(L[0],1)}${pd(L[2],3)}</div>${chips}`:`<div class="win-empty">${L2('لا يوجد فائزون في هذه الفئة','No winners in this category')}</div>`)+`</section>`;}).join('');
+  $('winnersThanksH').textContent='🎉 '+L2('مبروك لكل الفروع الفائزة','Congratulations to all winning branches');
+  $('winnersThanksP').textContent=L2('الترتيب حسب نسبة تحقيق المستهدف لكامل الشهر. شكراً لكل الفرق.','Ranked by full-month target achievement. Thank you to every team.');
+  spawnConfetti(); ceoInit();
+  if(CURTAIN_DONE) fireCannons(); else showCurtain();
+}
+let CURTAIN_DONE=false;
+function showCurtain(){
+  const c=$('curtain'); if(!c){CURTAIN_DONE=true;fireCannons();return;}
+  $('cEy').textContent=L2('مسابقة أثر · MATCH','MATCH · Athar');
+  $('cTitle').textContent=L2('الكشف عن فائزي سباق أثر لشهر '+monthName(MONTH),'Revealing the winners of Athar Race for '+monthName(MONTH));
+  $('cReveal').textContent=L2('اضغط للكشف','Tap to reveal');
+  const open=()=>{if(CURTAIN_DONE)return;CURTAIN_DONE=true;clearInterval(iv);c.classList.add('open');fireCannons();setTimeout(()=>{c.hidden=true;},1300);};
+  if(PRM){c.hidden=true;CURTAIN_DONE=true;fireCannons();return;}
+  c.hidden=false; let n=10; $('cCount').textContent=n;
+  const iv=setInterval(()=>{n--; if(n<=0){open();} else $('cCount').textContent=n;},900);
+  c.addEventListener('click',open,{once:true});
+}
+function spawnConfetti(){const el=$('winConfetti');if(!el||PRM)return;const cols=['#E2B45A','#B7842A','#5FC0B4','#F4E7CC','#fff'];
+  el.innerHTML=Array.from({length:42},()=>{const l=Math.random()*100,d=(2.4+Math.random()*2.8).toFixed(2),dl=(Math.random()*4).toFixed(2),c=cols[(Math.random()*cols.length)|0],w=6+((Math.random()*5)|0);
+    return `<i style="left:${l}%;width:${w}px;background:${c};animation-duration:${d}s;animation-delay:-${dl}s"></i>`;}).join('');}
+let CANNONS=false;
+function fireCannons(){if(CANNONS||!window.confetti||PRM)return;CANNONS=true;const cols=['#E8BE62','#F6D98B','#5FC0B4','#fff','#D9A94C'];
+  const shot=(x,a,n,v)=>confetti({particleCount:n,angle:a,spread:58,startVelocity:v,origin:{x,y:.72},colors:cols,zIndex:9999,scalar:1.05});
+  const end=Date.now()+2600;(function st(){shot(0,60,4,55);shot(1,120,4,55);if(Date.now()<end)requestAnimationFrame(st);})();
+  [250,1100,2000].forEach(t=>setTimeout(()=>{shot(0,55,90,75);shot(1,125,90,75);},t));}
+function ceoInit(){const au=$('ceoAudio'),card=$('ceoCard');if(!au)return;
+  $('ceoTitle').textContent=L2('كلمة الرئيس التنفيذي','CEO message');$('ceoHint').textContent=L2('رسالة تهنئة للفائزين','A word for the winners');
+  if(au.dataset.wired)return;au.dataset.wired='1';
+  au.addEventListener('canplay',()=>card.hidden=false,{once:true});
+  au.addEventListener('play',()=>card.classList.add('playing'));['pause','ended'].forEach(e=>au.addEventListener(e,()=>card.classList.remove('playing')));
+  let seen=false;try{seen=sessionStorage.getItem('athar-ceo')==='1';}catch(e){}if(seen)return;
+  au.play().then(()=>{try{sessionStorage.setItem('athar-ceo','1');}catch(e){}}).catch(err=>{if(err&&err.name!=='NotAllowedError')return;
+    $('ceoHint').innerHTML=L2('<span class="tap">🔊 اضغط في أي مكان لسماع الكلمة</span>','<span class="tap">🔊 Tap anywhere to play</span>');
+    const go=()=>{au.play().catch(()=>{});try{sessionStorage.setItem('athar-ceo','1');}catch(e){}$('ceoHint').textContent=L2('رسالة تهنئة للفائزين','A word for the winners');};
+    ['pointerdown','keydown'].forEach(e=>document.addEventListener(e,go,{once:true}));});}
+
+/* ---------- gating + month switch ---------- */
+function winnersPublic(k){return (EMBED.winnersMonths||[]).includes(k)&&EMBED.winnersFrom&&new Date()>=new Date(EMBED.winnersFrom+'T00:00:00');}
+function winnersActive(k){return (EMBED.winnersMonths||[]).includes(k)&&(PREVIEW||winnersPublic(k));}
+function previewBar(on){const b=$('previewBar');if(!b)return;b.hidden=!on;if(on)b.textContent=L2('👁️ معاينة — صفحة الفائزين غير منشورة للعامة بعد (للمراجعة الداخلية فقط)','👁️ Preview — winners page is not public yet (internal review only)');}
+function selectMonth(k){
+  bindMonth(k); applyLang(); header();
+  const win=winnersActive(k);
+  document.body.classList.toggle('winners-mode',win);
+  previewBar(PREVIEW&&win&&!winnersPublic(k));
+  if(win){renderWinners();}
+  else{ribbon();renderTicker();renderPrizes();renderFinderDefault();fillAM();renderRows();renderMovers();renderPeople(F._p||'ach');renderAreas();renderCar();renderMap();renderRules();}
+}
+
+/* ---------- events ---------- */
+$('tabs').addEventListener('click',e=>{const b=e.target.closest('.tab');if(!b)return;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t===b));
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id==='v-'+b.dataset.v));});
+$('chips').addEventListener('click',e=>{const c=e.target.closest('.chip-f');if(!c)return;F.f=c.dataset.f;
+  document.querySelectorAll('.chip-f').forEach(x=>x.classList.toggle('on',x===c));renderRows();});
+$('amSel').addEventListener('change',e=>{F.am=e.target.value;renderRows();});
+$('q').addEventListener('input',e=>{F.q=e.target.value;renderRows();});
+document.querySelector('.lhead').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const k=b.dataset.sort;
+  if(F.sort===k)F.dir*=-1;else{F.sort=k;F.dir=k==='name'?1:-1;}
+  document.querySelectorAll('.lhead button').forEach(x=>x.classList.toggle('s',x===b));renderRows();});
+$('rows').addEventListener('click',e=>{const m=e.target.closest('[data-row]');if(!m)return;const row=m.parentElement,n=m.dataset.row,willOpen=!row.classList.contains('open');
+  document.querySelectorAll('.lrow.open').forEach(r=>r.classList.remove('open'));if(willOpen){row.classList.add('open');openRow=n;}else openRow=null;});
+$('peopleSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;F._p=b.dataset.p;
+  document.querySelectorAll('#peopleSeg button').forEach(x=>x.classList.toggle('on',x===b));renderPeople(b.dataset.p);});
+$('mSel').addEventListener('change',e=>selectMonth(e.target.value));
+$('bAr').onclick=()=>{LANG='ar';selectMonth(MONTH);};
+$('bEn').onclick=()=>{LANG='en';selectMonth(MONTH);};
+$('themeBtn').onclick=()=>{const dark=document.documentElement.getAttribute('data-theme')!=='light';document.documentElement.setAttribute('data-theme',dark?'light':'dark');$('themeIcon').textContent=dark?'☀️':'🌙';};
+
+$('prizes').addEventListener('click',e=>{const o=e.target.closest('[data-open]');if(o){e.preventDefault();openInFinder(o.dataset.open);}});
+$('fq').addEventListener('input',e=>renderSugg(e.target.value));
+$('fq').addEventListener('keydown',e=>{if(e.key==='Enter'){const m=fMatches(e.target.value);if(m[0]){finderCard(m[0]);$('fsugg').hidden=true;}}});
+$('fsugg').addEventListener('click',e=>{const b=e.target.closest('[data-code]');if(!b)return;const s=RACE.find(x=>x.code===b.dataset.code);if(s){finderCard(s);$('fsugg').hidden=true;$('fq').value=s.name;}});
+document.addEventListener('click',e=>{if(!e.target.closest('.fbar'))$('fsugg').hidden=true;});
+
+/* ---------- boot ---------- */
+try{const t=localStorage.getItem('athar-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}
+try{const l=localStorage.getItem('athar-lang');if(l)LANG=l;}catch(e){}
+fillMonths(); selectMonth(MONTH);
+</script>

@@ -327,6 +327,8 @@ table.mini th{font-size:.74rem;color:var(--muted)}
 @media (max-width:640px){.nhead{min-width:118px;padding:8px 10px}.nall{grid-template-columns:1fr}}
 footer{padding-block:24px;font-size:.8rem;color:var(--muted)}
 .toast{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));inset-inline-start:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:9px;font-size:.88rem;z-index:20}
+.previewbar{position:fixed;inset-inline:0;bottom:0;z-index:45;background:var(--gold);color:var(--on-gold);text-align:center;padding:9px 16px;font-size:.86rem;font-weight:700;box-shadow:0 -4px 18px rgba(0,0,0,.28)}
+.previewbar[hidden]{display:none}
 [dir="rtl"] .toast{transform:translateX(50%)}
 textarea.copyfb{width:100%;min-height:120px;margin-top:8px;font:inherit;font-size:.85rem;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px}
 
@@ -362,10 +364,10 @@ body.winners-mode main>section:not(#winnersView){display:none}
 /* Winners announcement page */
 #winnersView{padding-block:0 40px;position:relative}
 body.winners-mode{background:
-  radial-gradient(circle at 50% -8%, color-mix(in srgb,var(--gold) 26%,transparent) 0, transparent 55%),
-  radial-gradient(circle at 2% 30%, color-mix(in srgb,#A855F7 22%,transparent) 0, transparent 42%),
-  radial-gradient(circle at 100% 52%, color-mix(in srgb,#EC4899 18%,transparent) 0, transparent 42%),
-  radial-gradient(circle at 28% 100%, color-mix(in srgb,#4F8CFF 18%,transparent) 0, transparent 46%),
+  radial-gradient(circle at 50% -8%, color-mix(in srgb,var(--gold) 28%,transparent) 0, transparent 55%),
+  radial-gradient(circle at 2% 30%, color-mix(in srgb,var(--brand) 22%,transparent) 0, transparent 44%),
+  radial-gradient(circle at 100% 52%, color-mix(in srgb,var(--gold) 18%,transparent) 0, transparent 42%),
+  radial-gradient(circle at 28% 100%, color-mix(in srgb,var(--brand) 20%,transparent) 0, transparent 46%),
   var(--bg);background-attachment:fixed}
 #winnersView::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.4;
   background-image:radial-gradient(var(--gold) 1.2px,transparent 1.6px),radial-gradient(color-mix(in srgb,var(--ink) 55%,transparent) 1px,transparent 1.4px);
@@ -421,6 +423,18 @@ body.winners-mode{background:
 .win-thanks{text-align:center;padding:22px;background:var(--surface);border:1px solid var(--line);border-radius:14px}
 .win-thanks h3{color:var(--gold);margin:0 0 6px;font-family:var(--f-display);font-size:1.3rem}
 .win-cats{display:flex;flex-direction:column;gap:20px}
+.ceo{display:flex;align-items:center;gap:14px 18px;flex-wrap:wrap;padding:16px 18px;border-radius:16px;
+  border:1px solid color-mix(in srgb,var(--gold) 45%,var(--line));background:linear-gradient(90deg,color-mix(in srgb,var(--gold) 10%,var(--surface)),var(--surface))}
+.ceo[hidden]{display:none}
+.ceo-mic{width:50px;height:50px;border-radius:50%;background:var(--gold);color:var(--on-gold);display:grid;place-items:center;font-size:24px;flex:none}
+.ceo.playing .ceo-mic{animation:ceoPulse 1.4s ease-in-out infinite}
+@keyframes ceoPulse{50%{box-shadow:0 0 0 10px color-mix(in srgb,var(--gold) 28%,transparent)}}
+.ceo-txt{flex:1 1 180px}
+.ceo-txt b{font-family:var(--f-display);font-size:1.05rem}
+.ceo-hint{font-size:.8rem;color:var(--muted);margin-top:2px}
+.ceo-hint .tap{color:var(--gold);font-weight:700}
+.ceo audio{flex:1 1 260px;max-width:100%;height:40px}
+@media (prefers-reduced-motion:reduce){.ceo.playing .ceo-mic{animation:none}}
 .win-none{text-align:center;padding:48px 16px;color:var(--muted);font-size:1.05rem}
 @media (max-width:640px){.win-n{font-size:1.9rem}.win-pct{font-size:2.3rem}.win-ico{font-size:46px}
   .pd .who{font-size:.9rem}.pd.p1 .blk{height:94px}.pd.p2 .blk{height:72px}.pd.p3 .blk{height:56px}.win-pills{width:100%}}
@@ -581,6 +595,11 @@ body.winners-mode{background:
         </div>
       </header>
       <section class="win-hero" id="winnersHero" aria-label="winner"></section>
+      <section class="ceo" id="ceoCard" hidden>
+        <div class="ceo-mic" aria-hidden="true">🎙️</div>
+        <div class="ceo-txt"><b id="ceoTitle">CEO message</b><div class="ceo-hint" id="ceoHint">A word for the winners</div></div>
+        <audio id="ceoAudio" preload="auto" controls src="media/ceo-voice.wav"></audio>
+      </section>
       <div class="win-cats" id="winnersCats"></div>
       <section class="win-thanks"><h3 id="winnersThanksH">🎉</h3><p class="muted" id="winnersThanksP"></p></section>
     </div>
@@ -588,11 +607,16 @@ body.winners-mode{background:
 </main>
 <footer><div class="wrap" id="foot"></div></footer>
 <div class="toast" id="toast" hidden></div>
+<div class="previewbar" id="previewBar" role="status" hidden></div>
 
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 <script id="embed" type="application/json">{}</script>
 <script>
+const QP = new URLSearchParams(location.search);
+const PREVIEW = QP.has('preview');                 // ?preview unlocks winners pages before the public date (management cross-check)
 const EMBED = JSON.parse(document.getElementById('embed').textContent);
-let MONTH = EMBED.default || Object.keys(EMBED.months)[0];
+const QPMONTH = QP.get('m');                        // ?m=2026-10 opens a specific month on load
+let MONTH = (QPMONTH && EMBED.months[QPMONTH]) ? QPMONTH : (EMBED.default || Object.keys(EMBED.months)[0]);
 let D, L, NDAYS, LEFT, RACE, BY;
 function bindMonth(k){ MONTH=k; D=EMBED.months[k]; L=D.last; NDAYS=D.days; LEFT=D.left;
   RACE=D.stores; BY={}; RACE.forEach(s=>BY[s.code]=s); }
@@ -1082,10 +1106,16 @@ document.getElementById('nBtn').addEventListener('click',()=>{NOPEN=!NOPEN; rend
 function renderAllViews(){ renderStatic(); renderNews(); renderPulse(); renderQuick(); renderMine(); renderTrack(); renderBoard(); renderClose(); renderMovers(); renderStars(); renderAreas(); fillFilters(); renderAll(); renderRules(); }
 
 // Month switching: October after the reveal date shows the winners page instead of the race board.
-function winnersActive(k){ return (EMBED.winnersMonths||[]).includes(k) && EMBED.winnersFrom && new Date() >= new Date(EMBED.winnersFrom+'T00:00:00'); }
+function winnersPublic(k){ return (EMBED.winnersMonths||[]).includes(k) && EMBED.winnersFrom && new Date() >= new Date(EMBED.winnersFrom+'T00:00:00'); }
+function winnersActive(k){ return (EMBED.winnersMonths||[]).includes(k) && (PREVIEW || winnersPublic(k)); }
 function selectMonth(k){ bindMonth(k); DEADLINE=monthDeadline();
   const win=winnersActive(k); document.body.classList.toggle('winners-mode', win);
+  previewBar(PREVIEW && win && !winnersPublic(k));
   if(win){ renderStatic(); renderWinners(); } else { renderAllViews(); } tickCD(); }
+function previewBar(on){ const b=document.getElementById('previewBar'); if(!b) return; b.hidden=!on;
+  if(on) b.textContent = LANG==='ar'
+    ? '👁️ معاينة — صفحة الفائزين غير منشورة للعامة بعد (للمراجعة الداخلية فقط)'
+    : '👁️ Preview — winners page is not public yet (internal review only)'; }
 const WMEDAL={A:'🚗',B:'📱',C:'💻',D:'⌚',E:'🥇'};
 const winEmp=(s)=>{const e=s.team&&s.team[0]; return e?`${esc(e[0])}${e[1]?` <span class="num">${e[1]}</span>`:''}`:'—';};
 const PRIZE_ICO={A:'🚗',B:'📱',C:'💻',D:'⌚',E:'🥇'};
@@ -1129,6 +1159,8 @@ function renderWinners(){
     'الترتيب حسب نسبة تحقيق المستهدف الفعلية لكامل الشهر. شكراً لكل الفرق على جهودهم.',
     'Ranked by full-month target achievement. Thank you to every team.');
   spawnConfetti();
+  fireCannons();
+  ceoInit();
 }
 function spawnConfetti(){
   const el=document.getElementById('winConfetti'); if(!el) return;
@@ -1137,6 +1169,38 @@ function spawnConfetti(){
   el.innerHTML=Array.from({length:42},()=>{const l=Math.random()*100,d=(2.4+Math.random()*2.8).toFixed(2),
     dl=(Math.random()*4).toFixed(2),c=cols[(Math.random()*cols.length)|0],w=6+((Math.random()*5)|0);
     return `<i style="left:${l}%;width:${w}px;background:${c};animation-duration:${d}s;animation-delay:-${dl}s"></i>`;}).join('');
+}
+// Party-popper cannons firing from the left and right edges on the winners reveal.
+let CANNONS_FIRED=false;
+function fireCannons(){
+  if(CANNONS_FIRED) return;                 // once per page load, not on every month/lang switch
+  if(!window.confetti || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  CANNONS_FIRED=true;
+  const cols=['#E8BE62','#F6D98B','#5FC0B4','#ffffff','#D9A94C'];
+  const shot=(x,angle,n,v)=>confetti({particleCount:n,angle,spread:58,startVelocity:v,origin:{x,y:0.72},colors:cols,zIndex:9999,scalar:1.05});
+  const end=Date.now()+2600;               // a steady stream from both sides…
+  (function stream(){ shot(0,60,4,55); shot(1,120,4,55); if(Date.now()<end) requestAnimationFrame(stream); })();
+  [250,1100,2000].forEach(t=>setTimeout(()=>{ shot(0,55,90,75); shot(1,125,90,75); },t));   // …plus three big bursts
+}
+// CEO voice note: show the card when the audio loads, try to play once per visit, fall back to tap.
+function ceoInit(){
+  const au=document.getElementById('ceoAudio'), card=document.getElementById('ceoCard'); if(!au||!card) return;
+  document.getElementById('ceoTitle').textContent = LANG==='ar' ? 'كلمة الرئيس التنفيذي' : 'CEO message';
+  document.getElementById('ceoHint').textContent  = LANG==='ar' ? 'رسالة تهنئة للفائزين' : 'A word for the winners';
+  if(au.dataset.wired) return; au.dataset.wired='1';
+  au.addEventListener('canplay',()=>{ card.hidden=false; },{once:true});
+  au.addEventListener('play',()=>card.classList.add('playing'));
+  ['pause','ended'].forEach(e=>au.addEventListener(e,()=>card.classList.remove('playing')));
+  let seen=false; try{ seen=sessionStorage.getItem('athar-ceo')==='1'; }catch(e){}
+  if(seen) return;
+  au.play().then(()=>{ try{sessionStorage.setItem('athar-ceo','1');}catch(e){} }).catch(err=>{
+    if(err && err.name!=='NotAllowedError') return;        // e.g. no file yet
+    const hint=document.getElementById('ceoHint');
+    hint.innerHTML = LANG==='ar' ? '<span class="tap">🔊 اضغط في أي مكان لسماع الكلمة</span>' : '<span class="tap">🔊 Tap anywhere to play the message</span>';
+    const go=()=>{ au.play().catch(()=>{}); try{sessionStorage.setItem('athar-ceo','1');}catch(e){}
+      hint.textContent = LANG==='ar' ? 'رسالة تهنئة للفائزين' : 'A word for the winners'; };
+    ['pointerdown','keydown'].forEach(e=>document.addEventListener(e,go,{once:true}));
+  });
 }
 function setLang(l){ LANG=l; try{localStorage.setItem('athar-lang',l);}catch(e){} selectMonth(MONTH); }
 bAr.onclick=()=>setLang('ar'); bEn.onclick=()=>setLang('en');

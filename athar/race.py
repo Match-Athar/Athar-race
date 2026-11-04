@@ -109,8 +109,8 @@ def race_data(stores, daily, targets, asof, elapsed=None, extra=None):
     for code, t in targets.items():
         tgt, fx = t["target"], FX[t["country"]]
         mtd = cum[code][-1] if cum[code] else 0.0
-        ach = mtd / (tgt * frac) if tgt and frac else 0.0
-        proj_sar = mtd * fx / frac if frac else 0.0
+        ach = mtd / tgt if tgt else 0.0                    # actual sales to date / full-month Total Target
+        proj_sar = mtd * fx / frac if frac else 0.0        # projected full-month SAR (prize-threshold checks only)
         ceiling = ceil_map[code] if code in ceil_map else _infer_ceiling(proj_sar)
 
         ca = [round(c / tgt * 100, 2) for c in cum[code]] if tgt else [0.0] * lastday
@@ -185,7 +185,7 @@ def race_data(stores, daily, targets, asof, elapsed=None, extra=None):
     by = {s["code"]: s for s in rows}
     tot_s = sum(sar(s["code"], cum[s["code"]][-1] if cum[s["code"]] else 0) for s in rows)
     tot_t = sum(targets[s["code"]]["target"] * FX[targets[s["code"]]["country"]] for s in rows)
-    pulse = {"ach": round(tot_s / (tot_t * frac), 4) if tot_t and frac else 0.0,
+    pulse = {"ach": round(tot_s / tot_t, 4) if tot_t else 0.0,                 # actual company sales / full Total Target
              "monthPct": round(tot_s / tot_t, 4) if tot_t else 0.0, "ly": _group_ly(rows, targets, cum, ly, lastday, sar),
              "inz": sum(1 for s in rows if s["prize"]), "near": sum(1 for s in rows if s["zone"] == "near"),
              "n": len(rows)}
