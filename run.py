@@ -242,10 +242,13 @@ def build_multi(a, refresh=None):
                  "winnersMonths": winners_months, "monthNames": cfg.get("month_names", {}),
                  "months": months}
     os.makedirs(os.path.join(a.out, "data"), exist_ok=True)
-    render(os.path.join(ROOT, "templates", "race.html"), container, os.path.join(a.out, "index.html"), refresh)
-    explorer = os.path.join(ROOT, "templates", "explorer.html")   # new interactive page, same live data
+    explorer = os.path.join(ROOT, "templates", "explorer.html")   # interactive dashboard, same live data
     if os.path.isfile(explorer):
-        render(explorer, container, os.path.join(a.out, "explorer.html"), refresh)
+        render(explorer, container, os.path.join(a.out, "index.html"), refresh)        # default landing page
+        render(explorer, container, os.path.join(a.out, "explorer.html"), refresh)     # alias
+        render(os.path.join(ROOT, "templates", "race.html"), container, os.path.join(a.out, "classic.html"), refresh)  # original board
+    else:
+        render(os.path.join(ROOT, "templates", "race.html"), container, os.path.join(a.out, "index.html"), refresh)
     json.dump(container, open(os.path.join(a.out, "data", "race.json"), "w", encoding="utf-8"), ensure_ascii=False)
     media = os.path.join(ROOT, "templates", "media")           # static assets (e.g. the CEO voice note)
     if os.path.isdir(media):

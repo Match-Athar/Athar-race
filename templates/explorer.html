@@ -267,6 +267,10 @@ section{padding:28px 0;border-top:1px solid var(--line)}
 .mvbadge.up{color:var(--good);background:var(--good-soft)}.mvbadge.dn{color:var(--bad);background:var(--bad-soft)}
 @media (max-width:860px){.mv2{grid-template-columns:1fr}.crow{grid-template-columns:30px 110px 1fr 70px}}
 
+.mini.click,.mvrow.click{cursor:pointer}
+.mini.click:hover,.mvrow.click:hover{background:var(--sunk);border-radius:9px}
+.eno{color:var(--muted);font-weight:400;font-size:.82rem}
+
 /* ===== winners view ===== */
 #winnersView{display:none}
 body.winners-mode #winnersView{display:block}
@@ -521,7 +525,13 @@ const TIERNAME=k=>({A:L2('سيارة','Car'),B:L2('جوال ذكي','Smartphone'
 const ICO={A:'🚗',B:'📱',C:'💻',D:'⌚',E:'🥇'};
 const TC={A:'--t-car',B:'--t-phone',C:'--t-ipad',D:'--t-watch',E:'--t-gold'};
 const empName=s=>{const e=s.team&&s.team[0];return e?esc(e[0]):'';};
-const carSVG=c=>`<svg width="30" height="22" viewBox="0 0 30 22" aria-hidden="true"><path d="M3 14 L5 8 Q6 6 9 6 L18 6 Q21 6 23 9 L26 11 Q28 12 28 14 L28 16 L3 16 Z" fill="${c}"/><rect x="9" y="8" width="5" height="3.5" rx="1" fill="var(--surface)"/><rect x="15.5" y="8" width="4.5" height="3.5" rx="1" fill="var(--surface)"/><circle cx="9" cy="16.5" r="3" fill="var(--ink)"/><circle cx="22" cy="16.5" r="3" fill="var(--ink)"/></svg>`;
+const empFull=s=>{const e=s.team&&s.team[0];return e?esc(e[0])+(e[1]?' · '+esc(e[1]):''):'';};
+const carSVG=c=>`<svg width="38" height="21" viewBox="0 0 64 32" aria-hidden="true">
+  <path d="M5 22 C5 19 7 18 10 17.4 L19 15.6 C21.5 11.5 24.5 9.5 29 9.5 L39 9.5 C43 9.5 46 11.5 49 15.5 L56.5 17.4 C59.5 18 61 19.2 61 22 L61 24 C61 25.2 60.2 25.6 59 25.6 L7 25.6 C5.8 25.6 5 25 5 24 Z" fill="${c}"/>
+  <path d="M24.5 11.3 L38.5 11.3 C41 11.3 43 12.6 45 15.2 L24.5 15.2 Z" fill="var(--surface)"/>
+  <path d="M22.8 11.6 C21.6 12.4 20.9 13.4 20.3 15.2 L22.8 15.2 Z" fill="var(--surface)"/>
+  <circle cx="18" cy="25" r="5.6" fill="var(--ink)"/><circle cx="18" cy="25" r="2.2" fill="${c}"/>
+  <circle cx="47" cy="25" r="5.6" fill="var(--ink)"/><circle cx="47" cy="25" r="2.2" fill="${c}"/></svg>`;
 const zoneOf=s=>s.ach>=1?'zone':(s.ach>=.85?'near':'');
 
 function bindMonth(k){MONTH=k;D=EMBED.months[k];RACE=D.stores||[];AREAS=D.areas||[];
@@ -597,7 +607,7 @@ function pzTierHTML(k){
   const seats=won?`${winners.length}/${k==='A'?1:10}`:(k==='A'?L2('مقعد واحد','1 seat'):L2('10 مقاعد','10 seats'));
   const body=won?`<div class="pz-won">✓ ${L2('في مراكز الفوز','In winning seats')}</div>`
     :lead?`<div class="pz-motiv"><span class="pz-dot"></span>${L2('باقي','')} <span class="pz-gap">${gap}%</span> ${L2('للتأهل','to qualify')}</div>`:'';
-  const leadLine=lead?`<div class="pz-lead"><span class="lnk">${esc(lead.name)}</span><small>${esc(lead.city)}${empName(lead)?' · 🏅 '+empName(lead):''}</small></div>`:`<div class="pz-lead" style="color:var(--muted);font-weight:400">${L2('لا يوجد منافس بعد','No contender yet')}</div>`;
+  const leadLine=lead?`<div class="pz-lead"><span class="lnk">${esc(lead.name)}</span><small>${esc(lead.city)}${empName(lead)?' · 🏅 '+empFull(lead):''}</small></div>`:`<div class="pz-lead" style="color:var(--muted);font-weight:400">${L2('لا يوجد منافس بعد','No contender yet')}</div>`;
   const list=won&&winners.length>1?`<div class="pz-list">${winners.slice(0,6).map(s=>`<span class="pz-chip" data-open="${esc(s.code)}">${esc(s.name)} · ${pf(s.ach)}</span>`).join('')}${winners.length>6?`<span class="pz-chip">+${winners.length-6}</span>`:''}</div>`:'';
   return `<div class="pz-card ${feat?'feat':''} ${won?'won':''} ${near?'near':''}" ${lead?`data-open="${lead.code}"`:''} style="--tc:var(${TC[k]})">
     <div class="pz-spin"></div><div class="pz-halo"></div>
@@ -675,13 +685,13 @@ function renderRows(){
 function renderPeople(k){
   const arr=RACE.filter(s=>empName(s)).slice().sort((a,b)=>(b[k]||0)-(a[k]||0)).slice(0,10);
   const val=s=>k==='lyG'?sgn(s.lyG,0):pf(s[k]);
-  $('peopleList').innerHTML=arr.map((s,i)=>`<div class="mini"><span class="rk2 ${i===0?'r1':''}">${i+1}</span>
-    <div><b>${empName(s)}</b><small>${esc(s.name)} · ${esc(s.city)}</small></div>
-    <div class="r ${k==='lyG'?((s.lyG||0)>=0?'good':'bad'):''}">${val(s)}</div></div>`).join('')||`<div class="empty">—</div>`;
+  $('peopleList').innerHTML=arr.map((s,i)=>{const e=s.team[0];return `<div class="mini click" data-open="${esc(s.code)}" title="${L2('افتح الفرع','Open branch')}"><span class="rk2 ${i===0?'r1':''}">${i+1}</span>
+    <div><b>${esc(e[0])}${e[1]?` <span class="eno">· ${esc(e[1])}</span>`:''}</b><small>${esc(s.name)} · ${esc(s.city)}</small></div>
+    <div class="r ${k==='lyG'?((s.lyG||0)>=0?'good':'bad'):''}">${val(s)}</div></div>`;}).join('')||`<div class="empty">—</div>`;
 }
 function renderAreas(){
   const rows=(AREAS.length?AREAS:[]).slice().sort((a,b)=>(b.ach||0)-(a.ach||0));
-  $('areaList').innerHTML=rows.map((r,i)=>`<div class="mini"><span class="rk2 ${i===0?'r1':''}">${i+1}</span>
+  $('areaList').innerHTML=rows.map((r,i)=>`<div class="mini${r.best?' click':''}"${r.best?` data-open="${esc(r.best)}"`:''}><span class="rk2 ${i===0?'r1':''}">${i+1}</span>
     <div><b>${esc(r.am)}</b><small>${L2(`${r.n} فرع`,`${r.n} branches`)}</small></div>
     <div class="r">${pf(r.ach)}</div></div>`).join('')||`<div class="empty">—</div>`;
 }
@@ -760,9 +770,9 @@ function renderFinderDefault(){let code=null;try{code=localStorage.getItem('atha
   const s=code&&RACE.find(x=>x.code===code);
   if(s)finderCard(s);else $('finderResult').innerHTML=`<p class="fprompt">${L2('ابدأ الكتابة للعثور على فرعك…','Start typing to find your branch…')}</p>`;}
 /* ---------- movers / map ---------- */
-function mvList(el,arr,fmt,isUp){if(!el)return;el.innerHTML=arr.map((s,i)=>`<div class="mvrow">
+function mvList(el,arr,fmt,isUp){if(!el)return;el.innerHTML=arr.map((s,i)=>`<div class="mvrow click" data-open="${esc(s.code)}">
   <span class="rk2 ${i===0?'r1':''}">${i+1}</span>
-  <div><b>${esc(s.name)}</b><small>${esc(s.city)}</small></div>
+  <div><b>${esc(s.name)}</b><small>${esc(s.city)}${empName(s)?' · 🏅 '+empFull(s):''}</small></div>
   <span class="mvbadge ${isUp(s)?'up':'dn'}">${isUp(s)?'▲':'▼'} ${fmt(s)}</span></div>`).join('')||`<div class="empty">—</div>`;}
 function renderMovers(){
   mvList($('moversRise'),[...RACE].filter(s=>s.lyG!=null).sort((a,b)=>(b.lyG||0)-(a.lyG||0)).slice(0,6),s=>sgn(s.lyG,0),s=>(s.lyG||0)>=0);
@@ -814,11 +824,11 @@ function renderWinners(){
     `<div class="win-banner" aria-hidden="true">🎉 ✨ 🎊</div>`+
     `<div class="win-htag">🏆 ${L2('أبطال مسابقة أثر','Athar champions')} · ${monthName(MONTH)}</div>`+
     `<div class="win-ico" aria-hidden="true">🚗</div>`+
-    (car?`<div class="win-n">${esc(car.name)}</div><div class="win-loc">${esc(car.city)} · ${esc(car.am||'')}</div><div class="win-pct">${pf(car.ach)}</div>`+(empName(car)?`<div class="win-team">⭐ ${empName(car)}</div>`:'')
+    (car?`<div class="win-n">${esc(car.name)}</div><div class="win-loc">${esc(car.city)} · ${esc(car.am||'')}</div><div class="win-pct">${pf(car.ach)}</div>`+(empName(car)?`<div class="win-team">⭐ ${empFull(car)}</div>`:'')
         :`<div class="win-n">${L2('لم تُمنح هذا الشهر','Not awarded this month')}</div><div class="win-loc">${L2('لم يحقق أي فرع شروط السيارة','No branch met the car conditions')}</div>`);
-  const pd=(b,place)=>b?`<div class="pd p${place}"><div class="who">${esc(b.name)}</div><div class="where">${esc(b.city)}</div>${empName(b)?`<div class="emp">⭐ ${empName(b)}</div>`:''}<div class="blk">${place}</div><div class="pdpct">${pf(b.ach)}</div></div>`:'<div></div>';
+  const pd=(b,place)=>b?`<div class="pd p${place}"><div class="who">${esc(b.name)}</div><div class="where">${esc(b.city)}</div>${empName(b)?`<div class="emp">⭐ ${empFull(b)}</div>`:''}<div class="blk">${place}</div><div class="pdpct">${pf(b.ach)}</div></div>`:'<div></div>';
   $('winnersCats').innerHTML=['B','C','D','E'].map(k=>{const L=by[k];
-    const chips=L.length>3?`<div class="win-chips">`+L.slice(3).map((b,i)=>`<span class="win-chip">${i+4}. <b>${esc(b.name)}</b>${empName(b)?' · '+empName(b):''} <span class="pdpct">${pf(b.ach)}</span></span>`).join('')+`</div>`:'';
+    const chips=L.length>3?`<div class="win-chips">`+L.slice(3).map((b,i)=>`<span class="win-chip">${i+4}. <b>${esc(b.name)}</b>${empName(b)?' · '+empFull(b):''} <span class="pdpct">${pf(b.ach)}</span></span>`).join('')+`</div>`:'';
     return `<section class="win-sec"><h3>${ICO[k]} ${TIERNAME(k)} <small>${L2(L.length+' فائز',L.length+' winner'+(L.length!==1?'s':''))}</small></h3>`+
       (L.length?`<div class="win-podium">${pd(L[1],2)}${pd(L[0],1)}${pd(L[2],3)}</div>${chips}`:`<div class="win-empty">${L2('لا يوجد فائزون في هذه الفئة','No winners in this category')}</div>`)+`</section>`;}).join('');
   $('winnersThanksH').textContent='🎉 '+L2('مبروك لكل الفروع الفائزة','Congratulations to all winning branches');
@@ -891,6 +901,7 @@ $('bEn').onclick=()=>{LANG='en';selectMonth(MONTH);};
 $('themeBtn').onclick=()=>{const dark=document.documentElement.getAttribute('data-theme')!=='light';document.documentElement.setAttribute('data-theme',dark?'light':'dark');$('themeIcon').textContent=dark?'☀️':'🌙';};
 
 $('prizes').addEventListener('click',e=>{const o=e.target.closest('[data-open]');if(o){e.preventDefault();openInFinder(o.dataset.open);}});
+['peopleList','moversRise','moversFast','areaList'].forEach(id=>{const el=$(id);if(el)el.addEventListener('click',e=>{const r=e.target.closest('[data-open]');if(r&&r.dataset.open)openInFinder(r.dataset.open);});});
 $('fq').addEventListener('input',e=>renderSugg(e.target.value));
 $('fq').addEventListener('keydown',e=>{if(e.key==='Enter'){const m=fMatches(e.target.value);if(m[0]){finderCard(m[0]);$('fsugg').hidden=true;}}});
 $('fsugg').addEventListener('click',e=>{const b=e.target.closest('[data-code]');if(!b)return;const s=RACE.find(x=>x.code===b.dataset.code);if(s){finderCard(s);$('fsugg').hidden=true;$('fq').value=s.name;}});
