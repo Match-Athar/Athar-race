@@ -10,9 +10,11 @@ on:
   push:
     paths: ["data/**", "templates/**", "athar/**", "run.py"]
   workflow_dispatch: {}
-  # Live board: rebuild from the API on a schedule too (every 10 min). Remove if a push rebuild is enough.
+  # Live board: rebuild from the API on a schedule too (every 15 min). Fewer runs = less queue on a
+  # private repo's limited runners. Widen (e.g. "*/30") to spend fewer Actions minutes, or remove to
+  # rebuild only on push.
   schedule:
-    - cron: "*/10 * * * *"
+    - cron: "*/15 * * * *"
 
 permissions:
   contents: read
