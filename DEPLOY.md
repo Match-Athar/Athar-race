@@ -101,10 +101,11 @@ https://<account>.github.io/<repo>/?preview&m=2026-10
 2. Add a line to `data/months.json` (and set `"default"` / `"winners"` as you want).
 3. Push. The `data/**` path triggers a rebuild.
 
-> November targets (`data/master-2026-11.xlsx`) hold the **real** November plan (114 branches,
-> 30-day curve) converted from "November Daily Targets 2026 with Prize.xlsx". Sales, staff and
-> last-year come from the live API; footfall reuses October's as a placeholder until a November
-> footfall sheet is available (it only affects the conversion metric).
+> November uses the full **"MATCH Sales Dashboard November 2026"** master
+> (`data/master-2026-11.xlsx`): 116 branches, real targets, the 30-day curve, prize ceilings
+> (all five tiers), area managers, footfall and last-year. Live sales/staff come from the Odoo
+> API; the master supplies everything else. Replace this file with an updated export to refresh
+> the plan.
 
 ## Notes
 
