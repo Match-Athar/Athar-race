@@ -150,6 +150,18 @@ section{padding:28px 0;border-top:1px solid var(--line)}
 .fstats .s .v{font-family:var(--f-num);font-weight:700;font-size:1.05rem;margin-top:3px}
 .fhint{margin-top:12px;font-size:.88rem;color:var(--muted)}.fhint b{color:var(--gold)}
 .fprompt{color:var(--muted);margin-top:16px;font-size:.9rem}
+.fneed{grid-column:1/-1;background:var(--gold-soft);border:1px solid color-mix(in srgb,var(--gold) 45%,var(--line));border-radius:12px;padding:14px 16px;margin-top:4px}
+.fneed .nh{font-weight:700;font-size:.95rem}
+.fneed .nmsg{font-size:.9rem;margin-top:3px}.fneed .nmsg b{color:var(--gold)}
+.fneed .ncalc{margin-top:12px}
+.fneed .ncalc label{font-size:.82rem;color:var(--muted)}.fneed .ncalc label b{color:var(--ink)}
+.fneed input[type=range]{width:100%;margin:8px 0 4px;accent-color:var(--gold);cursor:pointer}
+.fneed .nres{font-size:.88rem}.fneed .nres b{color:var(--gold)}
+.fneed .nact{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+.nbtn{background:var(--brand);color:var(--brand-ink);border:1px solid var(--brand);border-radius:9px;padding:9px 16px;font:inherit;font-weight:700;font-size:.85rem;cursor:pointer}
+.nbtn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.nbtn:hover{filter:brightness(1.05)}
+.nfb{position:absolute;left:-9999px;opacity:0}
 .fteam{grid-column:1/-1;border-top:1px solid var(--line);margin-top:8px;padding-top:14px}
 .fteam .dt{font-size:.64rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:10px;display:flex;justify-content:space-between}
 .trow2{display:grid;grid-template-columns:160px 1fr 52px;gap:12px;align-items:center;padding:5px 0}
@@ -781,6 +793,49 @@ function renderSugg(q){const el=$('fsugg'),m=fMatches(q);
   if(!m.length){el.hidden=true;el.innerHTML='';return;}
   el.innerHTML=m.map(s=>`<button data-code="${esc(s.code)}"><div><b>${esc(s.name)}</b><br><small>${esc(s.city)} · ${esc(s.am||'')}</small></div><span style="margin-inline-start:auto" class="num">${pf(s.ach)}</span></button>`).join('');
   el.hidden=false;}
+/* ---- "what it takes to hit 100%" widget (store detail) ---- */
+function needLineTxt(s){
+  if(s.needUp==null) return L2('حققتم مستهدف الشهر كاملاً. كل فاتورة إضافية ترفع ترتيبكم.','Month target done. Every extra sale lifts your rank.');
+  return s.needUp>0
+    ? L2(`ارفعوا أداء آخر 3 أيام بـ <b>${sgn(s.needUp,0)}</b> وحافظوا عليه حتى نهاية الشهر للوصول إلى 100%.`,`Lift your last-3-days performance by <b>${sgn(s.needUp,0)}</b> and hold it to month end to reach 100%.`)
+    : L2(`حافظوا على أداء آخر 3 أيام وستصلون إلى 100%، مع <b>${pf(-s.needUp,0)}</b> فائض.`,`Hold your last-3-days performance and you reach 100%, with <b>${pf(-s.needUp,0)}</b> to spare.`);
+}
+function needResTxt(st){const k=st[2],pa=st[1];const tail=k?TIERNAME(k)+' '+L2('(إن بقيت ضمن الحصة)','(if a slot is open)'):L2('بدون جائزة','No prize');
+  return L2(`نهاية الشهر: <b>${pf(pa)}</b> من المستهدف · ${tail}`,`Month end: <b>${pf(pa)}</b> of target · ${tail}`);}
+function needWidget(s){
+  if(!Array.isArray(s.steps)||!s.steps.length) return '';
+  const i0=Math.max(0,s.steps.findIndex(z=>z[0]===0)), st=s.steps[i0], u=st[0];
+  return `<div class="fneed">
+    <div class="nh">${L2('المطلوب للوصول إلى 100%','What it takes to hit 100%')}</div>
+    <div class="nmsg">${needLineTxt(s)}</div>
+    <div class="ncalc">
+      <label for="nslider">${L2('جرّب: غيّر أداء آخر 3 أيام بنسبة','Try it: change last-3-days performance by')} <b class="num" id="nv">${(u>=0?'+':'')+u}%</b></label>
+      <input type="range" id="nslider" min="0" max="${s.steps.length-1}" step="1" value="${i0}">
+      <div class="nres" id="nres">${needResTxt(st)}</div>
+    </div>
+    <div class="nact">
+      <button class="nbtn" id="nWa" type="button">${L2('انسخ رسالة واتساب','Copy WhatsApp message')}</button>
+      <button class="nbtn ghost" id="nChg" type="button">${L2('تغيير','Change')}</button>
+    </div>
+  </div>`;
+}
+function waTextStore(s){
+  const am=EMBED.months[MONTH]||{}; let dt='';
+  try{dt=new Date((am.asOf||'')+'T00:00:00').toLocaleDateString(LOC(),{day:'numeric',month:'short'});}catch(e){}
+  const prize=s.prize?TIERNAME(s.prize):L2('بدون جائزة','No prize');
+  const need=s.needUp==null?L2('حققنا 100% من مستهدف الشهر ✅','We hit 100% of the month target ✅')
+    :(s.needUp>0?L2('للوصول إلى 100%: ارفعوا أداء آخر 3 أيام '+sgn(s.needUp,0),'To reach 100%: lift last-3-days performance by '+sgn(s.needUp,0))
+      :L2('بوتيرة آخر 3 أيام نصل إلى 100% ✅','At our last-3-days pace we reach 100% ✅'));
+  return L2(`🏁 مسابقة أثر · ${s.name}\nالتحقيق حتى ${dt}: ${pf(s.ach)}\nآخر 3 أيام: ${pf(s.ach3,0)}\nالترتيب: ${s.rank}/${RACE.length}\nالجائزة المتوقعة: ${prize}\n${need}\nيلا يا فريق، اتركوا أثركم 💪`,
+`🏁 Athar Competition · ${s.name}\nAchievement to ${dt}: ${pf(s.ach)}\nLast 3 days: ${pf(s.ach3,0)}\nRank: ${s.rank}/${RACE.length}\nProjected prize: ${prize}\n${need}\nLet's go team, leave your mark 💪`);
+}
+function nFbCopy(btn,txt){let ta=document.getElementById('nfb');if(!ta){ta=document.createElement('textarea');ta.id='nfb';ta.className='nfb';btn.parentElement.appendChild(ta);}ta.value=txt;ta.focus();ta.select();try{document.execCommand('copy');btn.textContent=L2('تم النسخ ✓','Copied ✓');}catch(e){btn.textContent=L2('حدد وانسخ','Select & copy');}setTimeout(()=>{try{ta.remove();}catch(e){}},400);}
+function wireNeed(s){
+  const sl=$('nslider'); if(sl)sl.addEventListener('input',()=>{const st=s.steps[+sl.value],u=st[0];$('nv').textContent=(u>=0?'+':'')+u+'%';$('nres').innerHTML=needResTxt(st);});
+  const wa=$('nWa'); if(wa)wa.addEventListener('click',()=>{const txt=waTextStore(s),done=()=>{const o=wa.textContent;wa.textContent=L2('تم النسخ ✓','Copied ✓');setTimeout(()=>wa.textContent=o,1600);};
+    try{navigator.clipboard.writeText(txt).then(done,()=>nFbCopy(wa,txt));}catch(e){nFbCopy(wa,txt);}});
+  const ch=$('nChg'); if(ch)ch.addEventListener('click',()=>{const q=$('fq');if(q){q.value='';q.focus();q.scrollIntoView({behavior:'smooth',block:'center'});}});
+}
 function finderCard(s){
   const off=433*(1-Math.min(1,s.ach||0));
   const hint=s.ach>=1?L2(`في مراكز الفوز — الجائزة المتوقعة: <b>${s.prize?TIERNAME(s.prize):TIERNAME(s.ceiling)}</b>`,`In winning seats — projected prize: <b>${s.prize?TIERNAME(s.prize):TIERNAME(s.ceiling)}</b>`)
@@ -811,7 +866,8 @@ function finderCard(s){
         <div class="s"><div class="k">${L2('سقف الفئة','Ceiling')}</div><div class="v">${s.ceiling||'—'}</div></div>
       </div>
       <div class="fhint">${hint}</div>
-    </div>${staffHTML}</div>`;
+    </div>${needWidget(s)}${staffHTML}</div>`;
+  wireNeed(s);
   const fg=$('fringFg');if(fg){if(PRM)fg.style.strokeDashoffset=off;else{fg.style.strokeDashoffset='433';requestAnimationFrame(()=>fg.style.strokeDashoffset=off);}}
   try{localStorage.setItem('athar-mine',s.code);}catch(e){}
 }
