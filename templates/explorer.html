@@ -926,8 +926,10 @@ function winnersPublic(k){return (EMBED.winnersMonths||[]).includes(k)&&EMBED.wi
 function winnersActive(k){return (EMBED.winnersMonths||[]).includes(k)&&(PREVIEW||winnersPublic(k));}
 function previewBar(on){const b=$('previewBar');if(!b)return;b.hidden=!on;if(on)b.textContent=L2('👁️ معاينة — صفحة الفائزين غير منشورة للعامة بعد (للمراجعة الداخلية فقط)','👁️ Preview — winners page is not public yet (internal review only)');}
 function selectMonth(k){
-  bindMonth(k); applyLang(); header();
+  bindMonth(k);
   const win=winnersActive(k);
+  if(win)LANG='ar';   // winners page is always Arabic (audience is the branches); toggle is hidden here anyway
+  applyLang(); header();
   document.body.classList.toggle('winners-mode',win);
   previewBar(PREVIEW&&win&&!winnersPublic(k));
   if(win){renderWinners();}
