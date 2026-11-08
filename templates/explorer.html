@@ -75,7 +75,7 @@ section{padding:28px 0;border-top:1px solid var(--line)}
 .pz-card{position:relative;overflow:hidden;border-radius:18px;padding:20px;--tc:var(--gold);background:linear-gradient(160deg,var(--surface),var(--sunk));border:1px solid var(--line);
   opacity:0;transform:translateY(20px) scale(.98);transition:transform .4s cubic-bezier(.2,.7,.3,1),box-shadow .35s,border-color .35s,opacity .5s}
 .pz-card.in{opacity:1;transform:none}
-.pz-card[data-open]{cursor:pointer}
+.pz-card[data-scroll]{cursor:pointer}
 .pz-card.feat{grid-column:1/-1;padding:26px 28px;border-color:color-mix(in srgb,var(--tc) 55%,var(--line))}
 .pz-card.feat .pz-center{gap:30px}
 .pz-card.feat::before{content:"";position:absolute;inset:-1px;border-radius:19px;padding:1px;pointer-events:none;z-index:1;background:linear-gradient(120deg,transparent,var(--tc),transparent,var(--tc),transparent);background-size:300%;-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:pzBorder 4s linear infinite}
@@ -163,6 +163,9 @@ section{padding:28px 0;border-top:1px solid var(--line)}
 .trow2.ttot{border-top:1.5px solid color-mix(in srgb,var(--ink) 22%,var(--line));margin-top:5px;padding-top:9px}
 .trow2.ttot .nmc{font-weight:800}.trow2.ttot .tp{color:var(--gold);font-size:.9rem}
 .pz-lead .lnk,.pz-chip[data-open]{cursor:pointer}
+.pz-foot{margin-top:14px;position:relative;z-index:3}
+.pz-viewall{width:100%;padding:9px 12px;border-radius:10px;border:1px solid color-mix(in srgb,var(--tc) 45%,var(--line));background:color-mix(in srgb,var(--tc) 10%,transparent);color:var(--ink);font:inherit;font-size:.82rem;font-weight:600;cursor:pointer;transition:background .18s,border-color .18s}
+.pz-viewall:hover{background:color-mix(in srgb,var(--tc) 20%,transparent);border-color:var(--tc)}
 .pz-lead .lnk:hover{text-decoration:underline;text-decoration-color:var(--tc)}
 .pz-chip[data-open]:hover{border-color:var(--tc);color:var(--ink)}
 
@@ -257,6 +260,11 @@ section{padding:28px 0;border-top:1px solid var(--line)}
 .clane .carmk{position:absolute;top:50%;transform:translate(-50%,-50%);transition:inset-inline-start .7s cubic-bezier(.2,.7,.3,1);filter:drop-shadow(0 2px 3px rgba(0,0,0,.3))}
 [dir="rtl"] .clane .carmk{transform:translate(50%,-50%) scaleX(-1)}
 .crow .cp{text-align:end;font-family:var(--f-num);font-weight:700;font-size:1.02rem}.crow .cp small{display:block;font-weight:500;color:var(--muted);font-size:.68rem;font-family:var(--f-body)}
+.puck{display:block;width:16px;height:16px;border-radius:50%;background:var(--tc);box-shadow:0 0 0 3px color-mix(in srgb,var(--tc) 28%,transparent),0 2px 3px rgba(0,0,0,.3)}
+.trace{margin-top:24px;scroll-margin-top:16px}.trace:first-child{margin-top:0}
+.trace-h{display:flex;align-items:center;gap:12px;margin:0 2px 11px}
+.trace-h .tbadge{display:grid;place-items:center;width:38px;height:38px;border-radius:11px;font-size:1.15rem;background:color-mix(in srgb,var(--tc) 16%,var(--surface));border:1px solid color-mix(in srgb,var(--tc) 45%,var(--line))}
+.trace-t b{font-family:var(--f-serif);font-size:1.12rem}.trace-t small{display:block;color:var(--muted);font-size:.78rem}
 /* featured: movers cards */
 .mv2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .mvcard{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px 18px}
@@ -404,9 +412,15 @@ body.winners-mode{background:
   </section>
 
   <!-- FEATURED: CAR RACE -->
-  <section>
+  <section id="race-A">
     <div class="sh"><span class="ey" id="carEy">Category A · one car</span><h2 id="carH">The car race</h2><p id="carP">Every branch that can win the car, racing to 100% of target. The dashed line is the finish.</p></div>
     <div id="carFeat"></div>
+  </section>
+
+  <!-- PRIZE RACES (B–E) -->
+  <section>
+    <div class="sh"><span class="ey" id="prEy">The other prizes</span><h2 id="prH">The prize races</h2><p id="prP">Every branch chasing the phone, iPad, smartwatch and gold bar — ranked by how close each is to 100% of target.</p></div>
+    <div id="tierRaces"></div>
   </section>
 
   <!-- FEATURED: MOVERS -->
@@ -563,6 +577,8 @@ function applyLang(){
   $('fq').placeholder=L2('مثال: العزيزية · الرياض · Fall Square','e.g. Al Azizia · Riyadh · Fall Square');
   set('carEy','الفئة A · سيارة واحدة','Category A · one car'); set('carH','سباق السيارة','The car race');
   set('carP','كل فرع يمكنه الفوز بالسيارة في سباق نحو 100% من المستهدف. الخط المتقطّع هو خط النهاية.','Every branch that can win the car, racing to 100% of target. The dashed line is the finish.');
+  set('prEy','بقية الجوائز','The other prizes'); set('prH','سباقات الجوائز','The prize races');
+  set('prP','كل فرع يسعى للجوال الذكي والآيباد والساعة والسبيكة الذهبية — مرتّبين حسب قربهم من 100% من المستهدف.','Every branch chasing the phone, iPad, smartwatch and gold bar — ranked by how close each is to 100% of target.');
   set('mvEy','الزخم','Momentum'); set('mvH','الأكثر حركة','Movers');
   set('mvP','من يصعد الأسرع هذا الأسبوع، ومن يتسارع خلال آخر 3 أيام.','Who is climbing fastest this week, and who is accelerating over the last three days.');
   set('mvRiseH2','الأكثر صعوداً','Biggest risers'); set('mvFastH2','الأسرع نمواً','Fastest growing');
@@ -600,7 +616,7 @@ function ribbon(){
 
 /* ---------- prize board ---------- */
 function pzTierHTML(k){
-  const winners=RACE.filter(s=>s.prize===k).sort((a,b)=>b.ach-a.ach), won=winners.length>0;
+  const winners=RACE.filter(s=>s.prize===k).sort((a,b)=>b.ach-a.ach), won=winners.length>0, nC=RACE.filter(s=>s.ceiling===k).length;
   let lead=null,p=0,gap=0,near=false;
   if(won){lead=winners[0];p=Math.min(100,Math.round(lead.ach*100));}
   else{const el=RACE.filter(s=>s.ceiling===k&&s.prize!==k).sort((a,b)=>b.ach-a.ach);lead=el[0]||null;if(lead){p=Math.min(99,Math.round(lead.ach*100));gap=Math.max(0,100-p);near=p>=90;}}
@@ -608,9 +624,9 @@ function pzTierHTML(k){
   const seats=won?`${winners.length}/${k==='A'?1:10}`:(k==='A'?L2('مقعد واحد','1 seat'):L2('10 مقاعد','10 seats'));
   const body=won?`<div class="pz-won">✓ ${L2('في مراكز الفوز','In winning seats')}</div>`
     :lead?`<div class="pz-motiv"><span class="pz-dot"></span>${L2('باقي','')} <span class="pz-gap">${gap}%</span> ${L2('للتأهل','to qualify')}</div>`:'';
-  const leadLine=lead?`<div class="pz-lead"><span class="lnk">${esc(lead.name)}</span><small>${esc(lead.city)}${empName(lead)?' · 🏅 '+empFull(lead):''}</small></div>`:`<div class="pz-lead" style="color:var(--muted);font-weight:400">${L2('لا يوجد منافس بعد','No contender yet')}</div>`;
+  const leadLine=lead?`<div class="pz-lead"><span class="lnk" data-open="${lead.code}">${esc(lead.name)}</span><small>${esc(lead.city)}${empName(lead)?' · 🏅 '+empFull(lead):''}</small></div>`:`<div class="pz-lead" style="color:var(--muted);font-weight:400">${L2('لا يوجد منافس بعد','No contender yet')}</div>`;
   const list=won&&winners.length>1?`<div class="pz-list">${winners.slice(0,6).map(s=>`<span class="pz-chip" data-open="${esc(s.code)}">${esc(s.name)} · ${pf(s.ach)}</span>`).join('')}${winners.length>6?`<span class="pz-chip">+${winners.length-6}</span>`:''}</div>`:'';
-  return `<div class="pz-card ${feat?'feat':''} ${won?'won':''} ${near?'near':''}" ${lead?`data-open="${lead.code}"`:''} style="--tc:var(${TC[k]})">
+  return `<div class="pz-card ${feat?'feat':''} ${won?'won':''} ${near?'near':''}" data-scroll="race-${k}" style="--tc:var(${TC[k]})">
     <div class="pz-spin"></div><div class="pz-halo"></div>
     <div class="pz-body">
       <div class="pz-top"><span class="pz-tier">${k}</span><h3>${TIERNAME(k)}</h3><span class="pz-seats">${seats}</span></div>
@@ -622,6 +638,7 @@ function pzTierHTML(k){
         </div>
         <div class="pz-txt"><b>${p}%</b><small>${L2('من المستهدف','of target')}</small>${body}${leadLine}</div>
       </div>${list}
+      <div class="pz-foot"><button class="pz-viewall" data-scroll="race-${k}">${L2(`عرض كل المتنافسين (${nC})`,`View all contenders (${nC})`)} ↗</button></div>
     </div></div>`;
 }
 function renderPrizes(){
@@ -696,15 +713,24 @@ function renderAreas(){
     <div><b>${esc(r.am)}</b><small>${L2(`${r.n} فرع`,`${r.n} branches`)}</small></div>
     <div class="r">${pf(r.ach)}</div></div>`).join('')||`<div class="empty">—</div>`;
 }
-function renderCar(){
-  const el=$('carFeat');if(!el)return;
-  const arr=RACE.filter(s=>s._car).sort((a,b)=>b.ach-a.ach);   // all car-tier (A) contenders, not just top 10
+function laneHTML(arr,k){   // one race track: car marker for tier A, a tier-coloured puck for the rest
   const lo=.55,hi=1.2,pos=v=>Math.max(3,Math.min(97,(v-lo)/(hi-lo)*100));
-  el.innerHTML=`<div class="crace">`+arr.map((s,i)=>`<div class="crow">
+  const mk=i=>k==='A'?carSVG(i===0?'var(--gold)':'var(--brand)'):`<span class="puck"></span>`;
+  return `<div class="crace" style="--tc:var(${TC[k]})">`+arr.map((s,i)=>`<div class="crow">
     <span class="rk2 ${i===0?'r1':''}">${i+1}</span>
     <div class="nm"><b>${esc(s.name)}</b><small>${esc(s.city)} · ${esc(s.am||'')}</small></div>
-    <div class="clane"><div class="fill" style="width:${pos(s.ach)}%"></div><div class="finish" style="inset-inline-start:${pos(1)}%"></div><div class="carmk" style="inset-inline-start:${pos(s.ach)}%">${carSVG(i===0?'var(--gold)':'var(--brand)')}</div></div>
+    <div class="clane"><div class="fill" style="width:${pos(s.ach)}%"></div><div class="finish" style="inset-inline-start:${pos(1)}%"></div><div class="carmk" style="inset-inline-start:${pos(s.ach)}%">${mk(i)}</div></div>
     <div class="cp">${pf(s.ach)}<small>${s.ach>=1?L2('تجاوز الحد','clears'):L2('باقي '+Math.round((1-s.ach)*100)+'%','+'+Math.round((1-s.ach)*100)+'% to go')}</small></div></div>`).join('')+`</div>`;
+}
+function renderCar(){const el=$('carFeat');if(!el)return;el.innerHTML=laneHTML(RACE.filter(s=>s.ceiling==='A').sort((a,b)=>b.ach-a.ach),'A');}
+function renderTierRaces(){
+  const el=$('tierRaces');if(!el)return;
+  el.innerHTML=['B','C','D','E'].map(k=>{
+    const arr=RACE.filter(s=>s.ceiling===k).sort((a,b)=>b.ach-a.ach);
+    const head=`<div class="trace-h"><span class="tbadge" style="--tc:var(${TC[k]})">${ICO[k]}</span><div class="trace-t"><b>${TIERNAME(k)}</b><small>${L2(arr.length+' فرع متنافس · 10 مقاعد',arr.length+' contenders · 10 seats')}</small></div></div>`;
+    const body=arr.length?laneHTML(arr,k):`<div class="crace"><div class="empty" style="padding:18px 6px">${L2('لا يوجد منافس بعد','No contenders yet')}</div></div>`;
+    return `<div class="trace" id="race-${k}">${head}${body}</div>`;
+  }).join('');
 }
 function renderRules(){
   const R=[[L2('حقّق 100% من المستهدف','Hit 100% of target'),L2('لا يدخل أي فرع لوحة الجوائز قبل بلوغه المستهدف الكامل.','Only branches at or above their full-month target enter the board.')],
@@ -767,6 +793,7 @@ function openInFinder(code){const s=RACE.find(x=>x.code===code);if(!s)return;
   $('fq').value=s.name; $('fsugg').hidden=true; finderCard(s);
   const h=$('fdH'); if(h)h.scrollIntoView({behavior:'smooth',block:'start'});
   setTimeout(()=>{try{$('fq').focus({preventScroll:true});}catch(e){}},450);}
+function goTo(id){const el=document.getElementById(id);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});}
 function renderFinderDefault(){let code=null;try{code=localStorage.getItem('athar-mine');}catch(e){}
   const s=code&&RACE.find(x=>x.code===code);
   if(s)finderCard(s);else $('finderResult').innerHTML=`<p class="fprompt">${L2('ابدأ الكتابة للعثور على فرعك…','Start typing to find your branch…')}</p>`;}
@@ -878,7 +905,7 @@ function selectMonth(k){
   document.body.classList.toggle('winners-mode',win);
   previewBar(PREVIEW&&win&&!winnersPublic(k));
   if(win){renderWinners();}
-  else{ribbon();renderTicker();renderPrizes();renderFinderDefault();fillAM();renderRows();renderMovers();renderPeople(F._p||'ach');renderAreas();renderCar();renderMap();renderRules();}
+  else{ribbon();renderTicker();renderPrizes();renderFinderDefault();fillAM();renderRows();renderMovers();renderPeople(F._p||'ach');renderAreas();renderCar();renderTierRaces();renderMap();renderRules();}
 }
 
 /* ---------- events ---------- */
@@ -901,7 +928,7 @@ $('bAr').onclick=()=>{LANG='ar';selectMonth(MONTH);};
 $('bEn').onclick=()=>{LANG='en';selectMonth(MONTH);};
 $('themeBtn').onclick=()=>{const dark=document.documentElement.getAttribute('data-theme')!=='light';const mode=dark?'light':'dark';document.documentElement.setAttribute('data-theme',mode);$('themeIcon').textContent=dark?'🌙':'☀️';try{localStorage.setItem('athar-theme',mode);}catch(e){}};
 
-$('prizes').addEventListener('click',e=>{const o=e.target.closest('[data-open]');if(o){e.preventDefault();openInFinder(o.dataset.open);}});
+$('prizes').addEventListener('click',e=>{const o=e.target.closest('[data-open]');if(o){e.preventDefault();openInFinder(o.dataset.open);return;}const sc=e.target.closest('[data-scroll]');if(sc){e.preventDefault();goTo(sc.dataset.scroll);}});
 ['peopleList','moversRise','moversFast','areaList'].forEach(id=>{const el=$(id);if(el)el.addEventListener('click',e=>{const r=e.target.closest('[data-open]');if(r&&r.dataset.open)openInFinder(r.dataset.open);});});
 $('fq').addEventListener('input',e=>renderSugg(e.target.value));
 $('fq').addEventListener('keydown',e=>{if(e.key==='Enter'){const m=fMatches(e.target.value);if(m[0]){finderCard(m[0]);$('fsugg').hidden=true;}}});
