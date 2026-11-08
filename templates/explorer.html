@@ -943,7 +943,9 @@ function renderWinners(){
       (L.length?`<div class="win-podium">${pd(L[1],2)}${pd(L[0],1)}${pd(L[2],3)}</div>${chips}`:`<div class="win-empty">${L2('لا يوجد فائزون في هذه الفئة','No winners in this category')}</div>`)+`</section>`;}).join('');
   $('winnersThanksH').textContent='🎉 '+L2('مبروك لكل الفروع الفائزة','Congratulations to all winning branches');
   $('winnersThanksP').textContent=L2('الترتيب حسب نسبة تحقيق المستهدف لكامل الشهر. شكراً لكل الفرق.','Ranked by full-month target achievement. Thank you to every team.');
-  spawnConfetti(); ceoInit();
+  spawnConfetti();
+  if(MONTH==='2026-10'){const cc=$('ceoCard');if(cc)cc.hidden=true;}  // shortcut: CEO note suppressed for Oct only; add more months here if others opt out
+  else ceoInit();
   if(CURTAIN_DONE) fireCannons(); else showCurtain();
 }
 let CURTAIN_DONE=false;
