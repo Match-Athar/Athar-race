@@ -26,6 +26,22 @@ PRIZE = {"A": "سيارة", "B": "جوال ذكي", "C": "آيباد", "D": "س�
 # Branches that never take part (EXBUAE = temporary UAE exhibition, closed)
 EXCLUDE = {"EXBUAE"}
 
+# Live Odoo POS codes that drifted from the master's target codes mid-period (same physical branch,
+# renamed account — usually a "2" suffix, or HA-MEDAD). Maps API store_name (UPPER) -> master target
+# code so the branch's sales join instead of showing 0%. Add new drifts here (the build prints
+# "WARNING branches with sales but no target" for any still unmatched).
+API_ALIASES = {
+    "ALAQUEQ2": "ALAQUEQ",          # Aqiq Street, Riyadh
+    "HA-MEDAD": "MEDAD",            # Medad Center Match, Riyadh
+    "ALWATANIAH2": "ALWATANIAH",   # Al Wataniyah, Hafer Al Batin
+    "MILAGROPLZ2": "MILAGROPLZ",   # Milagro Plaza, Tabuk
+    "ALHAZIM2": "ALHAZIM",         # Al Hizam, Abha
+    "ABHATIMESQ2": "ABHATIMESQ",   # Time Square, Abha
+    "HAKHAMBLV2": "HAKHAMBLV",     # Boulivard, Khamis Meshaet
+    "HAHAILZONE2": "HAHAILZONE",   # Hail Zone, Hail
+    "HAKHALELSQ": "KHALIL SUQARE", # Khalil Square, Makkah (matched by name)
+}
+
 # Personal employee POS accounts look like "1238-Abdellah", "6253 -WAlotibi" or "Aalzhrani-6563".
 # Anything else (shared/branch accounts) is ignored when picking the branch's winner.
 EMP_PATTERN = r"(^\d{3,}\s*-)|(-\s*\d{3,}$)"

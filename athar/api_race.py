@@ -16,7 +16,7 @@ import os
 import datetime
 
 from .api import load_env, gcc_offset, fetch_orders, UTC_FMT
-from .config import EXCLUDE
+from .config import EXCLUDE, API_ALIASES
 
 
 def aggregate(orders, offset):
@@ -31,6 +31,7 @@ def aggregate(orders, offset):
     for i, o in enumerate(orders):
         try:
             store = str(o["store_name"]).strip().upper()
+            store = API_ALIASES.get(store, store)            # bridge renamed POS codes to the master's code
             raw = str(o.get("cashier_name") or "").strip()
             amt = float(o.get("amount_wod_incl_tax") or 0)   # tax-included, to match the targets' basis
             g = datetime.datetime.strptime(o["date_order"], UTC_FMT) + offset
