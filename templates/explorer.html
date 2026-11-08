@@ -266,6 +266,7 @@ section{padding:28px 0;border-top:1px solid var(--line)}
 .trace-h .tbadge{display:grid;place-items:center;width:38px;height:38px;border-radius:11px;font-size:1.15rem;background:color-mix(in srgb,var(--tc) 16%,var(--surface));border:1px solid color-mix(in srgb,var(--tc) 45%,var(--line))}
 .trace-t b{font-family:var(--f-serif);font-size:1.12rem}.trace-t small{display:block;color:var(--muted);font-size:.78rem}
 section#race-A{scroll-margin-top:12px}
+#tabs{scroll-margin-top:12px}
 .pgbar{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-items:center;padding:16px 4px 2px}
 .pgb{min-width:34px;height:34px;padding:0 11px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--muted);font:inherit;font-weight:700;font-size:.85rem;cursor:pointer;transition:background .15s,border-color .15s,color .15s}
 .pgb:hover:not(:disabled){border-color:var(--tc,var(--brand));color:var(--ink)}
@@ -700,7 +701,8 @@ function renderRows(){
   const avg=arr.length?Math.round(arr.reduce((t,s)=>t+(s.ach||0),0)/arr.length*100):0;
   $('summary').innerHTML=L2(`عرض <b>${arr.length}</b> من ${RACE.length} · المتوسط <b>${avg}%</b>`,`Showing <b>${arr.length}</b> of ${RACE.length} · avg <b>${avg}%</b>`);
   const old={};document.querySelectorAll('.lrow').forEach(r=>old[r.dataset.n]=r.getBoundingClientRect().top);
-  $('rows').innerHTML=arr.length?arr.map(rowHTML).join(''):`<div class="empty">${L2('لا نتائج','No branches match.')}</div>`;
+  const RSIZE=20, slice=pageSlice('rows',arr,RSIZE), cur=PAGE['rows']||0;
+  $('rows').innerHTML=arr.length?slice.map((s,i)=>rowHTML(s,cur*RSIZE+i)).join('')+pagerHTML('rows',arr.length,RSIZE):`<div class="empty">${L2('لا نتائج','No branches match.')}</div>`;
   if(openRow){const r=document.querySelector(`.lrow[data-n="${CSS.escape(openRow)}"]`);if(r)r.classList.add('open');}
   if(!PRM)document.querySelectorAll('.lrow').forEach(r=>{const o=old[r.dataset.n];if(o==null)return;const dd=o-r.getBoundingClientRect().top;
     if(dd){r.style.transition='none';r.style.transform=`translateY(${dd}px)`;requestAnimationFrame(()=>{r.style.transition='transform .4s cubic-bezier(.2,.7,.3,1)';r.style.transform='';});}});
@@ -937,12 +939,12 @@ $('tabs').addEventListener('click',e=>{const b=e.target.closest('.tab');if(!b)re
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t===b));
   document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id==='v-'+b.dataset.v));});
 $('chips').addEventListener('click',e=>{const c=e.target.closest('.chip-f');if(!c)return;F.f=c.dataset.f;
-  document.querySelectorAll('.chip-f').forEach(x=>x.classList.toggle('on',x===c));renderRows();});
-$('amSel').addEventListener('change',e=>{F.am=e.target.value;renderRows();});
-$('q').addEventListener('input',e=>{F.q=e.target.value;renderRows();});
+  document.querySelectorAll('.chip-f').forEach(x=>x.classList.toggle('on',x===c));PAGE['rows']=0;renderRows();});
+$('amSel').addEventListener('change',e=>{F.am=e.target.value;PAGE['rows']=0;renderRows();});
+$('q').addEventListener('input',e=>{F.q=e.target.value;PAGE['rows']=0;renderRows();});
 document.querySelector('.lhead').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const k=b.dataset.sort;
   if(F.sort===k)F.dir*=-1;else{F.sort=k;F.dir=k==='name'?1:-1;}
-  document.querySelectorAll('.lhead button').forEach(x=>x.classList.toggle('s',x===b));renderRows();});
+  document.querySelectorAll('.lhead button').forEach(x=>x.classList.toggle('s',x===b));PAGE['rows']=0;renderRows();});
 $('rows').addEventListener('click',e=>{const m=e.target.closest('[data-row]');if(!m)return;const row=m.parentElement,n=m.dataset.row,willOpen=!row.classList.contains('open');
   document.querySelectorAll('.lrow.open').forEach(r=>r.classList.remove('open'));if(willOpen){row.classList.add('open');openRow=n;}else openRow=null;});
 $('peopleSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;F._p=b.dataset.p;
@@ -954,8 +956,8 @@ $('themeBtn').onclick=()=>{const dark=document.documentElement.getAttribute('dat
 
 $('prizes').addEventListener('click',e=>{const o=e.target.closest('[data-open]');if(o){e.preventDefault();openInFinder(o.dataset.open);return;}const sc=e.target.closest('[data-scroll]');if(sc){e.preventDefault();goTo(sc.dataset.scroll);}});
 document.addEventListener('click',e=>{const b=e.target.closest('.pgb');if(!b||b.disabled)return;const key=b.dataset.pg;PAGE[key]=+b.dataset.p;
-  if(key==='race-A')renderCar();else renderTierRaces();
-  const sec=document.getElementById(key);if(sec)sec.scrollIntoView({behavior:'smooth',block:'start'});});
+  if(key==='race-A')renderCar();else if(key==='rows')renderRows();else renderTierRaces();
+  const sec=document.getElementById(key==='rows'?'tabs':key);if(sec)sec.scrollIntoView({behavior:'smooth',block:'start'});});
 ['peopleList','moversRise','moversFast','areaList'].forEach(id=>{const el=$(id);if(el)el.addEventListener('click',e=>{const r=e.target.closest('[data-open]');if(r&&r.dataset.open)openInFinder(r.dataset.open);});});
 $('fq').addEventListener('input',e=>renderSugg(e.target.value));
 $('fq').addEventListener('keydown',e=>{if(e.key==='Enter'){const m=fMatches(e.target.value);if(m[0]){finderCard(m[0]);$('fsugg').hidden=true;}}});
