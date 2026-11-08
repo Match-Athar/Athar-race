@@ -265,6 +265,13 @@ section{padding:28px 0;border-top:1px solid var(--line)}
 .trace-h{display:flex;align-items:center;gap:12px;margin:0 2px 11px}
 .trace-h .tbadge{display:grid;place-items:center;width:38px;height:38px;border-radius:11px;font-size:1.15rem;background:color-mix(in srgb,var(--tc) 16%,var(--surface));border:1px solid color-mix(in srgb,var(--tc) 45%,var(--line))}
 .trace-t b{font-family:var(--f-serif);font-size:1.12rem}.trace-t small{display:block;color:var(--muted);font-size:.78rem}
+section#race-A{scroll-margin-top:12px}
+.pgbar{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-items:center;padding:16px 4px 2px}
+.pgb{min-width:34px;height:34px;padding:0 11px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--muted);font:inherit;font-weight:700;font-size:.85rem;cursor:pointer;transition:background .15s,border-color .15s,color .15s}
+.pgb:hover:not(:disabled){border-color:var(--tc,var(--brand));color:var(--ink)}
+.pgb.on{background:var(--tc,var(--brand));border-color:transparent;color:#07201c}
+.pgb:disabled{opacity:.35;cursor:default}
+.pgdot{color:var(--muted);padding:0 3px}
 /* featured: movers cards */
 .mv2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .mvcard{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px 18px}
@@ -713,24 +720,41 @@ function renderAreas(){
     <div><b>${esc(r.am)}</b><small>${L2(`${r.n} فرع`,`${r.n} branches`)}</small></div>
     <div class="r">${pf(r.ach)}</div></div>`).join('')||`<div class="empty">—</div>`;
 }
-function laneHTML(arr,k){   // one race track: car marker for tier A, a tier-coloured puck for the rest
-  const lo=.55,hi=1.2,pos=v=>Math.max(3,Math.min(97,(v-lo)/(hi-lo)*100));
-  const mk=i=>k==='A'?carSVG(i===0?'var(--gold)':'var(--brand)'):`<span class="puck"></span>`;
-  return `<div class="crace" style="--tc:var(${TC[k]})">`+arr.map((s,i)=>`<div class="crow">
-    <span class="rk2 ${i===0?'r1':''}">${i+1}</span>
-    <div class="nm"><b>${esc(s.name)}</b><small>${esc(s.city)} · ${esc(s.am||'')}</small></div>
-    <div class="clane"><div class="fill" style="width:${pos(s.ach)}%"></div><div class="finish" style="inset-inline-start:${pos(1)}%"></div><div class="carmk" style="inset-inline-start:${pos(s.ach)}%">${mk(i)}</div></div>
-    <div class="cp">${pf(s.ach)}<small>${s.ach>=1?L2('تجاوز الحد','clears'):L2('باقي '+Math.round((1-s.ach)*100)+'%','+'+Math.round((1-s.ach)*100)+'% to go')}</small></div></div>`).join('')+`</div>`;
+const PAGE={}, PGSIZE=10;   // client-side pagination for the race lanes
+function pageSlice(key,arr,size){const pages=Math.max(1,Math.ceil(arr.length/size));let cur=PAGE[key]||0;if(cur>=pages)cur=PAGE[key]=pages-1;if(cur<0)cur=PAGE[key]=0;return arr.slice(cur*size,cur*size+size);}
+function pagerHTML(key,total,size){
+  const pages=Math.ceil(total/size);if(pages<=1)return '';
+  const cur=PAGE[key]||0, b=(p,lab,dis,on)=>`<button class="pgb${on?' on':''}" data-pg="${key}" data-p="${p}"${dis?' disabled':''}>${lab}</button>`;
+  const win=1,lo=Math.max(0,cur-win),hi=Math.min(pages-1,cur+win);let nums='';
+  if(lo>0){nums+=b(0,'1',false,false);if(lo>1)nums+='<span class="pgdot">…</span>';}
+  for(let p=lo;p<=hi;p++)nums+=b(p,p+1,false,p===cur);
+  if(hi<pages-1){if(hi<pages-2)nums+='<span class="pgdot">…</span>';nums+=b(pages-1,pages,false,false);}
+  return `<div class="pgbar">${b(cur-1,'‹',cur===0,false)}${nums}${b(cur+1,'›',cur===pages-1,false)}</div>`;
 }
-function renderCar(){const el=$('carFeat');if(!el)return;el.innerHTML=laneHTML(RACE.filter(s=>s.ceiling==='A').sort((a,b)=>b.ach-a.ach),'A');}
+function laneHTML(arr,k,start=0){   // one race-track page: car marker for tier A, a tier-coloured puck for the rest
+  const lo=.55,hi=1.2,pos=v=>Math.max(3,Math.min(97,(v-lo)/(hi-lo)*100));
+  const mk=r=>k==='A'?carSVG(r===0?'var(--gold)':'var(--brand)'):`<span class="puck"></span>`;
+  return `<div class="crace" style="--tc:var(${TC[k]})">`+arr.map((s,i)=>{const r=start+i;return `<div class="crow">
+    <span class="rk2 ${r===0?'r1':''}">${r+1}</span>
+    <div class="nm"><b>${esc(s.name)}</b><small>${esc(s.city)} · ${esc(s.am||'')}</small></div>
+    <div class="clane"><div class="fill" style="width:${pos(s.ach)}%"></div><div class="finish" style="inset-inline-start:${pos(1)}%"></div><div class="carmk" style="inset-inline-start:${pos(s.ach)}%">${mk(r)}</div></div>
+    <div class="cp">${pf(s.ach)}<small>${s.ach>=1?L2('تجاوز الحد','clears'):L2('باقي '+Math.round((1-s.ach)*100)+'%','+'+Math.round((1-s.ach)*100)+'% to go')}</small></div></div>`;}).join('')+`</div>`;
+}
+function renderLane(el,all,k,key){
+  if(!el)return;
+  if(!all.length){el.innerHTML=`<div class="crace"><div class="empty" style="padding:18px 6px">${L2('لا يوجد منافس بعد','No contenders yet')}</div></div>`;return;}
+  const slice=pageSlice(key,all,PGSIZE),cur=PAGE[key]||0;
+  el.innerHTML=laneHTML(slice,k,cur*PGSIZE)+pagerHTML(key,all.length,PGSIZE);
+}
+function renderCar(){renderLane($('carFeat'),RACE.filter(s=>s.ceiling==='A').sort((a,b)=>b.ach-a.ach),'A','race-A');}
 function renderTierRaces(){
   const el=$('tierRaces');if(!el)return;
   el.innerHTML=['B','C','D','E'].map(k=>{
-    const arr=RACE.filter(s=>s.ceiling===k).sort((a,b)=>b.ach-a.ach);
-    const head=`<div class="trace-h"><span class="tbadge" style="--tc:var(${TC[k]})">${ICO[k]}</span><div class="trace-t"><b>${TIERNAME(k)}</b><small>${L2(arr.length+' فرع متنافس · 10 مقاعد',arr.length+' contenders · 10 seats')}</small></div></div>`;
-    const body=arr.length?laneHTML(arr,k):`<div class="crace"><div class="empty" style="padding:18px 6px">${L2('لا يوجد منافس بعد','No contenders yet')}</div></div>`;
-    return `<div class="trace" id="race-${k}">${head}${body}</div>`;
+    const n=RACE.filter(s=>s.ceiling===k).length;
+    const head=`<div class="trace-h"><span class="tbadge" style="--tc:var(${TC[k]})">${ICO[k]}</span><div class="trace-t"><b>${TIERNAME(k)}</b><small>${L2(n+' فرع متنافس · 10 مقاعد',n+' contenders · 10 seats')}</small></div></div>`;
+    return `<div class="trace" id="race-${k}" style="--tc:var(${TC[k]})">${head}<div class="lane-slot"></div></div>`;
   }).join('');
+  ['B','C','D','E'].forEach(k=>renderLane(document.querySelector(`#race-${k} .lane-slot`),RACE.filter(s=>s.ceiling===k).sort((a,b)=>b.ach-a.ach),k,'race-'+k));
 }
 function renderRules(){
   const R=[[L2('حقّق 100% من المستهدف','Hit 100% of target'),L2('لا يدخل أي فرع لوحة الجوائز قبل بلوغه المستهدف الكامل.','Only branches at or above their full-month target enter the board.')],
@@ -929,6 +953,9 @@ $('bEn').onclick=()=>{LANG='en';selectMonth(MONTH);};
 $('themeBtn').onclick=()=>{const dark=document.documentElement.getAttribute('data-theme')!=='light';const mode=dark?'light':'dark';document.documentElement.setAttribute('data-theme',mode);$('themeIcon').textContent=dark?'🌙':'☀️';try{localStorage.setItem('athar-theme',mode);}catch(e){}};
 
 $('prizes').addEventListener('click',e=>{const o=e.target.closest('[data-open]');if(o){e.preventDefault();openInFinder(o.dataset.open);return;}const sc=e.target.closest('[data-scroll]');if(sc){e.preventDefault();goTo(sc.dataset.scroll);}});
+document.addEventListener('click',e=>{const b=e.target.closest('.pgb');if(!b||b.disabled)return;const key=b.dataset.pg;PAGE[key]=+b.dataset.p;
+  if(key==='race-A')renderCar();else renderTierRaces();
+  const sec=document.getElementById(key);if(sec)sec.scrollIntoView({behavior:'smooth',block:'start'});});
 ['peopleList','moversRise','moversFast','areaList'].forEach(id=>{const el=$(id);if(el)el.addEventListener('click',e=>{const r=e.target.closest('[data-open]');if(r&&r.dataset.open)openInFinder(r.dataset.open);});});
 $('fq').addEventListener('input',e=>renderSugg(e.target.value));
 $('fq').addEventListener('keydown',e=>{if(e.key==='Enter'){const m=fMatches(e.target.value);if(m[0]){finderCard(m[0]);$('fsugg').hidden=true;}}});
