@@ -217,15 +217,19 @@ def build_multi(a, refresh=None):
     """Multi-month race board: build each month's D and embed them keyed by YYYY-MM, so the page's
     dropdown can switch months and show October's winners page after the reveal date."""
     from athar.api_race import read_race_api
+    from athar.master import read_master
     cfg = json.load(open(a.months, encoding="utf-8"))
     months, winners_months = {}, []
     default_raw = None
     for m in cfg["months"]:
         ym, ref = m["ym"], m["ref"]
-        try:
-            stores, daily, targets, src_asof, extra = read_race_api(ref, _month_asof(ym, m.get("asof")))
-        except Exception as e:
-            sys.exit(f"Month {ym}: sales API failed: {e}")
+        if m.get("source") == "master":                  # finalized month: sales + targets straight from the workbook
+            stores, daily, targets, src_asof, extra = read_master(ref)
+        else:
+            try:
+                stores, daily, targets, src_asof, extra = read_race_api(ref, _month_asof(ym, m.get("asof")))
+            except Exception as e:
+                sys.exit(f"Month {ym}: sales API failed: {e}")
         elapsed = None
         if src_asof == gcc_today().isoformat():          # current month still running: pace on finished days
             elapsed = max(1, int(src_asof[-2:]) - 1)

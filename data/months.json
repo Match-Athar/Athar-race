@@ -3,6 +3,6 @@
   "winners_from": "2026-11-10",
   "months": [
     { "ym": "2026-11", "ref": "data/master-2026-11.xlsx" },
-    { "ym": "2026-10", "ref": "data/master-2026-10.xlsx", "winners": true }
+    { "ym": "2026-10", "ref": "data/master-2026-10.xlsx", "winners": true, "source": "master" }
   ]
 }
