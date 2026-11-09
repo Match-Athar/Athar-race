@@ -809,7 +809,7 @@ function needWidget(s){
     <div class="nh">${L2('المطلوب للوصول إلى 100%','What it takes to hit 100%')}</div>
     <div class="nmsg">${needLineTxt(s)}</div>
     <div class="ncalc">
-      <label for="nslider">${L2('جرّب: غيّر أداء آخر 3 أيام بنسبة','Try it: change last-3-days performance by')} <b class="num" id="nv">${(u>=0?'+':'')+u}%</b></label>
+      <label for="nslider">${L2(`جرّب: غيّر أداء آخر 3 أيام (الآن <b class="num">${pf(s.ach3,0)}</b>) بنسبة`,`Try it: change last-3-days performance (now <b class="num">${pf(s.ach3,0)}</b>) by`)} <b class="num" id="nv">${(u>=0?'+':'')+u}%</b></label>
       <input type="range" id="nslider" min="0" max="${s.steps.length-1}" step="1" value="${i0}">
       <div class="nres" id="nres">${needResTxt(st)}</div>
     </div>
