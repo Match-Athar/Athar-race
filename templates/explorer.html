@@ -160,6 +160,8 @@ section{padding:28px 0;border-top:1px solid var(--line)}
 .fneed .nact{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
 .nbtn{background:var(--brand);color:var(--brand-ink);border:1px solid var(--brand);border-radius:9px;padding:9px 16px;font:inherit;font-weight:700;font-size:.85rem;cursor:pointer}
 .nbtn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.nbtn.gold{background:var(--gold);color:#07201c;border-color:var(--gold)}
+.fneed #nTarget{display:inline-block;margin-top:10px}
 .nbtn:hover{filter:brightness(1.05)}
 .nfb{position:absolute;left:-9999px;opacity:0}
 .fteam{grid-column:1/-1;border-top:1px solid var(--line);margin-top:8px;padding-top:14px}
@@ -800,18 +802,27 @@ function needLineTxt(s){
     ? L2(`ارفعوا وتيرة آخر 3 أيام بـ <b>${sgn(s.needUp,0)}</b> وحافظوا عليها حتى نهاية الشهر للوصول إلى 100%.`,`Lift your last-3-days pace by <b>${sgn(s.needUp,0)}</b> and hold it to month end to reach 100%.`)
     : L2(`حافظوا على وتيرة آخر 3 أيام وستصلون إلى 100%، مع <b>${pf(-s.needUp,0)}</b> فائض.`,`Hold your last-3-days pace and you reach 100%, with <b>${pf(-s.needUp,0)}</b> to spare.`);
 }
-function needResTxt(st){const k=st[2],pa=st[1];const tail=k?TIERNAME(k)+' '+L2('(إن بقيت ضمن الحصة)','(if a slot is open)'):L2('بدون جائزة','No prize');
+function needResTxt(pa,k){const tail=k?TIERNAME(k)+' '+L2('(إن بقيت ضمن الحصة)','(if a slot is open)'):L2('بدون جائزة','No prize');
   return L2(`بهذه الوتيرة ستنهي الشهر عند <b>${pf(pa)}</b> من المستهدف · ${tail}`,`on this pace you'd finish at <b>${pf(pa)}</b> of target · ${tail}`);}
+function needModel(s){const st=s.steps,a=st[0],b=st[st.length-1];
+  const slope=(b[0]!==a[0])?(b[1]-a[1])/(b[0]-a[0]):0;              // Δ(finish) per 1% pace change — linear
+  const i0=Math.max(0,st.findIndex(z=>z[0]===0)), base=st[i0][1];  // projected finish at current pace
+  return {base,slope,need:slope>0?(1-base)/slope:Infinity};}       // pace lift (%) needed to reach 100%
+const needPa=(m,d)=>m.base+m.slope*d;
 function needWidget(s){
   if(!Array.isArray(s.steps)||!s.steps.length) return '';
-  const i0=Math.max(0,s.steps.findIndex(z=>z[0]===0)), st=s.steps[i0], u=st[0];
+  const m=needModel(s);
+  const canReach=s.needUp!=null&&s.needUp>0&&isFinite(m.need)&&m.need>0;   // behind pace, and a lift can still get there
+  const max=Math.max(50,canReach?Math.min(300,Math.ceil(m.need/5)*5):0);   // let the slider actually reach the target
+  const target=canReach?`<button class="nbtn gold" id="nTarget" type="button">${L2('🎯 اعرض الوصول إلى 100% (ارفع '+sgn(s.needUp,0)+')','🎯 Reach 100% (lift '+sgn(s.needUp,0)+')')}</button>`:'';
   return `<div class="fneed">
     <div class="nh">${L2('المطلوب للوصول إلى 100%','What it takes to hit 100%')}</div>
     <div class="nmsg">${needLineTxt(s)}</div>
     <div class="ncalc">
-      <label for="nslider">${L2('جرّب: غيّر وتيرة آخر 3 أيام بنسبة','Try it: change last-3-days pace by')} <b class="num" id="nv">${(u>=0?'+':'')+u}%</b></label>
-      <input type="range" id="nslider" min="0" max="${s.steps.length-1}" step="1" value="${i0}">
-      <div class="nres" id="nres">${needResTxt(st)}</div>
+      <label for="nslider">${L2('جرّب: غيّر وتيرة آخر 3 أيام بنسبة','Try it: change last-3-days pace by')} <b class="num" id="nv">+0%</b></label>
+      <input type="range" id="nslider" min="-30" max="${max}" step="1" value="0">
+      <div class="nres" id="nres">${needResTxt(m.base,m.base>=1?s.ceiling:null)}</div>
+      ${target}
     </div>
     <div class="nact">
       <button class="nbtn" id="nWa" type="button">${L2('انسخ رسالة واتساب','Copy WhatsApp message')}</button>
@@ -824,14 +835,17 @@ function waTextStore(s){
   try{dt=new Date((am.asOf||'')+'T00:00:00').toLocaleDateString(LOC(),{day:'numeric',month:'short'});}catch(e){}
   const prize=s.prize?TIERNAME(s.prize):L2('بدون جائزة','No prize');
   const need=s.needUp==null?L2('حققنا 100% من مستهدف الشهر ✅','We hit 100% of the month target ✅')
-    :(s.needUp>0?L2('للوصول إلى 100%: ارفعوا أداء آخر 3 أيام '+sgn(s.needUp,0),'To reach 100%: lift last-3-days performance by '+sgn(s.needUp,0))
+    :(s.needUp>0?L2('للوصول إلى 100%: ارفعوا وتيرة آخر 3 أيام '+sgn(s.needUp,0),'To reach 100%: lift last-3-days pace by '+sgn(s.needUp,0))
       :L2('بوتيرة آخر 3 أيام نصل إلى 100% ✅','At our last-3-days pace we reach 100% ✅'));
   return L2(`🏁 مسابقة أثر · ${s.name}\nالتحقيق حتى ${dt}: ${pf(s.ach)}\nآخر 3 أيام: ${pf(s.ach3,0)}\nالترتيب: ${s.rank}/${RACE.length}\nالجائزة المتوقعة: ${prize}\n${need}\nيلا يا فريق، اتركوا أثركم 💪`,
 `🏁 Athar Competition · ${s.name}\nAchievement to ${dt}: ${pf(s.ach)}\nLast 3 days: ${pf(s.ach3,0)}\nRank: ${s.rank}/${RACE.length}\nProjected prize: ${prize}\n${need}\nLet's go team, leave your mark 💪`);
 }
 function nFbCopy(btn,txt){let ta=document.getElementById('nfb');if(!ta){ta=document.createElement('textarea');ta.id='nfb';ta.className='nfb';btn.parentElement.appendChild(ta);}ta.value=txt;ta.focus();ta.select();try{document.execCommand('copy');btn.textContent=L2('تم النسخ ✓','Copied ✓');}catch(e){btn.textContent=L2('حدد وانسخ','Select & copy');}setTimeout(()=>{try{ta.remove();}catch(e){}},400);}
 function wireNeed(s){
-  const sl=$('nslider'); if(sl)sl.addEventListener('input',()=>{const st=s.steps[+sl.value],u=st[0];$('nv').textContent=(u>=0?'+':'')+u+'%';$('nres').innerHTML=needResTxt(st);});
+  const sl=$('nslider'),m=needModel(s);
+  const paint=d=>{const pa=needPa(m,d),k=pa>=1?s.ceiling:null;$('nv').textContent=(d>=0?'+':'')+d+'%';$('nres').innerHTML=needResTxt(pa,k);};
+  if(sl)sl.addEventListener('input',()=>paint(+sl.value));
+  const tg=$('nTarget'); if(tg&&sl)tg.addEventListener('click',()=>{sl.value=Math.max(+sl.min,Math.min(+sl.max,Math.round(m.need)));$('nv').textContent=sgn(s.needUp,0);$('nres').innerHTML=needResTxt(1,s.ceiling);});
   const wa=$('nWa'); if(wa)wa.addEventListener('click',()=>{const txt=waTextStore(s),done=()=>{const o=wa.textContent;wa.textContent=L2('تم النسخ ✓','Copied ✓');setTimeout(()=>wa.textContent=o,1600);};
     try{navigator.clipboard.writeText(txt).then(done,()=>nFbCopy(wa,txt));}catch(e){nFbCopy(wa,txt);}});
   const ch=$('nChg'); if(ch)ch.addEventListener('click',()=>{const q=$('fq');if(q){q.value='';q.focus();q.scrollIntoView({behavior:'smooth',block:'center'});}});
