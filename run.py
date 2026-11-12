@@ -251,6 +251,12 @@ def build_multi(a, refresh=None):
         render(explorer, container, os.path.join(a.out, "index.html"), refresh)        # default landing page
         render(explorer, container, os.path.join(a.out, "explorer.html"), refresh)     # alias
         render(os.path.join(ROOT, "templates", "race.html"), container, os.path.join(a.out, "classic.html"), refresh)  # original board
+        for ym in winners_months:                          # dedicated winners page per month (lands straight on the reveal)
+            y, mo = ym.split("-")
+            slug = f"{calendar.month_name[int(mo)].lower()}-{y}"
+            render(explorer, {**container, "default": ym}, os.path.join(a.out, f"winners-{slug}.html"), refresh)
+        if winners_months:                                 # short alias -> most recent winners month
+            render(explorer, {**container, "default": winners_months[-1]}, os.path.join(a.out, "winners.html"), refresh)
     else:
         render(os.path.join(ROOT, "templates", "race.html"), container, os.path.join(a.out, "index.html"), refresh)
     json.dump(container, open(os.path.join(a.out, "data", "race.json"), "w", encoding="utf-8"), ensure_ascii=False)
