@@ -748,7 +748,8 @@ function pagerHTML(key,total,size){
   return `<div class="pgbar">${b(cur-1,'‹',cur===0,false)}${nums}${b(cur+1,'›',cur===pages-1,false)}</div>`;
 }
 function laneHTML(arr,k,start=0){   // one race-track page: car marker for tier A, a tier-coloured puck for the rest
-  const lo=.55,hi=1.2,pos=v=>Math.max(3,Math.min(97,(v-lo)/(hi-lo)*100));
+  const FIN=86;   // finish line (= 100% of target) sits at 86% of the track; 0% at the start so progress always shows
+  const pos=v=>{v=Math.max(0,v||0);return v<=1?3+(FIN-3)*v:Math.min(97,FIN+(97-FIN)*Math.min(1,v-1));};
   const mk=r=>k==='A'?carSVG(r===0?'var(--gold)':'var(--brand)'):`<span class="puck"></span>`;
   return `<div class="crace" style="--tc:var(${TC[k]})">`+arr.map((s,i)=>{const r=start+i;return `<div class="crow">
     <span class="rk2 ${r===0?'r1':''}">${r+1}</span>
